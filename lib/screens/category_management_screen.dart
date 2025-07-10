@@ -152,6 +152,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const BackButton(),
         title: const Text("Categories"),
         actions: [
           IconButton(icon: const Icon(Icons.add), onPressed: _showAddDialog),
