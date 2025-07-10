@@ -11,9 +11,9 @@ void main() {
       title: 'Demo App',
 
       // Chọn màn hình muốn chạy ở đây:
-      home: const AuthScreen(),
-      //home: BudgetPlanning(),
-      //home: EditScreen(),
+      //home: const AuthScreen(),
+      home: BudgetPlanning(),
+      //home: Editscreen(),
       //home: CategoryManagementScreen(),
     ),
   );
