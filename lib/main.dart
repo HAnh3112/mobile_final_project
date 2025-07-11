@@ -20,10 +20,6 @@ void main() {
       //home: const AddTransactionScreen(),
       home: const DashboardScreen(),
 
-
-      //home: const AddTransactionScreen(),
-      //home: const DashboardScreen(),
-
       //home: BudgetPlanning(),
       //home: Editscreen(),
       //home: CategoryManagementScreen(),
