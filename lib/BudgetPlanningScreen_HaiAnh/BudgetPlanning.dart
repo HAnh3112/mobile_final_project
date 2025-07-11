@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class BudgetPlanning extends StatelessWidget{
   @override
@@ -49,7 +50,7 @@ class BudgetPlanningBody extends StatefulWidget{
 
 class _BudgetPlannignBodyState extends State<BudgetPlanningBody>{
   List<String> mockData = ["Item1","Item2","Item3","Item4","Item5","Item6","Item7","Item8","Item9","Item10"];
-  //List<String> mockData = [];
+  // List<String> mockData = [];
   int? editingIndex; // Track which index is being edited
   TextEditingController editingController = TextEditingController();
 
@@ -124,6 +125,9 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody>{
                                         decoration: InputDecoration(
                                           hintText: "Enter new amount",
                                         ),
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.digitsOnly
+                                        ],
                                       )
                                     : Text("200\$"), //REPLACE WITH REAL DATA LATER
                               ),
