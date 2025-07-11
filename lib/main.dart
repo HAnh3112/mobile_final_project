@@ -18,15 +18,11 @@ void main() {
       //home: const AuthScreen(),
 
       //home: const AddTransactionScreen(),
-      home: const DashboardScreen(),
-
-
-      //home: const AddTransactionScreen(),
       //home: const DashboardScreen(),
 
       //home: BudgetPlanning(),
       //home: Editscreen(),
-      //home: CategoryManagementScreen(),
+      home: CategoryManagementScreen(),
 
       //home: TransactionHistoryScreen(), // Transaction History Screen
     ),

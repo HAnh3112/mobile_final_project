@@ -25,8 +25,8 @@ class CategoryManagementScreen extends StatefulWidget {
 
 class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
   final List<Category> _categories = [];
-
   final TextEditingController _nameController = TextEditingController();
+
   String? _selectedIcon;
   Color _selectedColor = const Color(0xFFFF6B6B);
 
@@ -44,6 +44,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     '✈️',
     '🎮',
   ];
+
   final List<Color> commonColors = [
     Color(0xFFFF6B6B),
     Color(0xFF4ECDC4),
@@ -56,88 +57,92 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
   ];
 
   void _showAddDialog() {
+    _nameController.clear();
+    _selectedIcon = null;
+    _selectedColor = const Color(0xFFFF6B6B);
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Add New Category"),
-        content: SingleChildScrollView(
-          child: Column(
-            children: [
-              TextField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: "Category Name"),
-              ),
-              const SizedBox(height: 12),
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text("Choose Icon"),
-              ),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: commonIcons.map((icon) {
-                  return ChoiceChip(
-                    label: Text(icon, style: const TextStyle(fontSize: 20)),
-                    selected: _selectedIcon == icon,
-                    onSelected: (_) => setState(() => _selectedIcon = icon),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 12),
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text("Choose Color"),
-              ),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: commonColors.map((color) {
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedColor = color),
-                    child: Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: _selectedColor == color
-                              ? Colors.black
-                              : Colors.transparent,
-                          width: 2,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setStateDialog) => AlertDialog(
+          title: const Text("Add New Category"),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(labelText: "Category Name"),
+                ),
+                const SizedBox(height: 12),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text("Choose Icon"),
+                ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: commonIcons.map((icon) {
+                    return ChoiceChip(
+                      label: Text(icon, style: const TextStyle(fontSize: 20)),
+                      selected: _selectedIcon == icon,
+                      onSelected: (_) =>
+                          setStateDialog(() => _selectedIcon = icon),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 12),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text("Choose Color"),
+                ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: commonColors.map((color) {
+                    return GestureDetector(
+                      onTap: () => setStateDialog(() => _selectedColor = color),
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: _selectedColor == color
+                                ? Colors.black
+                                : Colors.transparent,
+                            width: 2,
+                          ),
                         ),
                       ),
-                    ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_nameController.text.isNotEmpty && _selectedIcon != null) {
+                  final newCategory = Category(
+                    id: const Uuid().v4(),
+                    name: _nameController.text,
+                    icon: _selectedIcon!,
+                    color: _selectedColor,
                   );
-                }).toList(),
-              ),
-            ],
-          ),
+                  setState(() => _categories.add(newCategory));
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text("Add"),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (_nameController.text.isNotEmpty && _selectedIcon != null) {
-                final newCategory = Category(
-                  id: const Uuid().v4(),
-                  name: _nameController.text,
-                  icon: _selectedIcon!,
-                  color: _selectedColor,
-                );
-                setState(() => _categories.add(newCategory));
-                _nameController.clear();
-                _selectedIcon = null;
-                _selectedColor = const Color(0xFFFF6B6B);
-                Navigator.pop(context);
-              }
-            },
-            child: const Text("Add"),
-          ),
-        ],
       ),
     );
   }
