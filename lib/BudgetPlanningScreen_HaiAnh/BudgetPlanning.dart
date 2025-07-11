@@ -4,6 +4,7 @@ class BudgetPlanning extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
         leading: IconButton(onPressed: (){}, icon: Icon(Icons.arrow_back),color: Colors.black,),// FUNCTION TO NAVIGATE BACK,
         title: Text("Budget Planning",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
