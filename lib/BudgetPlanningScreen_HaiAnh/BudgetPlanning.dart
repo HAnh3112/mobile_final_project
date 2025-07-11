@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class BudgetPlanning extends StatelessWidget{
   @override
@@ -34,7 +35,7 @@ class screenIfNoBudgetExist extends StatelessWidget{
           child: ElevatedButton(
            onPressed: (){}, //Navigation to add budget page
            style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
-           child: Text("+ Set New Budget",style: TextStyle(color: Colors.black),)
+           child: Text("+ Set New Budget",style: TextStyle(color: Colors.white),)
            ),
         )
       ],
@@ -48,8 +49,10 @@ class BudgetPlanningBody extends StatefulWidget{
 }
 
 class _BudgetPlannignBodyState extends State<BudgetPlanningBody>{
-  //List<String> mockData = ["Item1","Item2","Item3","Item4","Item5","Item6","Item7","Item8","Item9","Item10"];
-  List<String> mockData = [];
+  List<String> mockData = ["Item1","Item2","Item3","Item4","Item5","Item6","Item7","Item8","Item9","Item10"];
+  // List<String> mockData = [];
+  int? editingIndex; // Track which index is being edited
+  TextEditingController editingController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -97,31 +100,93 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody>{
         (mockData.isEmpty)? screenIfNoBudgetExist():
         Expanded(
           child: ListView.builder(
-            scrollDirection: Axis.vertical,
-            itemCount: mockData.length,
-            itemBuilder: (context, index) {
-              return Container(
-                padding: EdgeInsets.all(10),
-                margin: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.black,
-                    width: 2
-                  ),
-                  borderRadius: BorderRadius.circular(10)
+                  itemCount: mockData.length,
+                  itemBuilder: (context, index) {
+                    bool isEditing = editingIndex == index;
+
+                    return Container(
+                      padding: EdgeInsets.all(10),
+                      margin: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Expanded(flex: 1, child: Text(mockData[index])),
+                              Expanded(
+                                flex: 2,
+                                child: isEditing
+                                    ? TextField(
+                                        controller: editingController,
+                                        decoration: InputDecoration(
+                                          hintText: "Enter new amount",
+                                        ),
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.digitsOnly
+                                        ],
+                                      )
+                                    : Text("200\$"), //REPLACE WITH REAL DATA LATER
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      if (isEditing) {
+                                        // UPDATE DATA FUNCTION HERE
+                                        editingIndex = null; // close editor
+                                      } else {
+                                        editingIndex = index;
+                                        editingController.text = "200"; // CURRENT VALUE WHEN CANCEL
+                                      }
+                                    });
+                                  },
+                                  child: Text(isEditing ? "Save" : "Edit"),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          // Optional extra row if you want to animate or show more
+                          if (isEditing)
+                            Align(
+                              alignment: Alignment.center,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      "Editing ${mockData[index]} budget",
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+
+                                    SizedBox(width: 10,),
+
+                                    Spacer(),
+
+                                    ElevatedButton(onPressed: (){
+                                      setState(() {
+                                        // DELETE FUNCTION BASE ON ID HERE
+                                      });
+                                    },
+                                    style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
+                                    child: Text("Delete",style: TextStyle(color: Colors.white),))
+                                  ],
+                                ),
+                              ),
+                            )
+                        ],
+                      ),
+                    );
+                  },
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(flex: 1, child: Text(mockData[index])),
-                    Expanded(flex: 2, child: Text("200\$")),
-                    Expanded(flex: 1, child: ElevatedButton(onPressed: (){}, child: Text("Edit")))
-                  ],
-                ),
-              );
-            },
-          ),
-        )
+              ),
+        
       ],
     );
   }
