@@ -15,9 +15,9 @@ void main() {
 
       // Chọn màn hình muốn chạy ở đây:
       //home: const AuthScreen(),
-      home: const AddTransactionScreen(),
+      //home: const AddTransactionScreen(),
       //home: const DashboardScreen(),
-      //home: BudgetPlanning(),
+      home: BudgetPlanning(),
       //home: Editscreen(),
       //home: CategoryManagementScreen(),
 
