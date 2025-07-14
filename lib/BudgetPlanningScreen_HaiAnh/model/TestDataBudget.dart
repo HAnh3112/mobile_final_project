@@ -1,0 +1,68 @@
+import 'package:flutter/material.dart';
+import 'Budget.dart';
+
+final List<Budget> mockBudgets = [
+  Budget(
+    budgetId: 1,
+    userId: 101,
+    categoryId: 10,
+    categoryName: "Transportation",
+    amount: 300.0,
+    month: 7,
+    year: 2025,
+  ),
+  Budget(
+    budgetId: 2,
+    userId: 101,
+    categoryId: 12,
+    categoryName: "Eating",
+    amount: 150.0,
+    month: 7,
+    year: 2025,
+  ),
+    Budget(
+    budgetId: 3,
+    userId: 101,
+    categoryId: 13,
+    categoryName: "Salary",
+    amount: 150.0,
+    month: 7,
+    year: 2025,
+  ),
+    Budget(
+    budgetId: 4,
+    userId: 101,
+    categoryId: 14,
+    categoryName: "Date",
+    amount: 180.0,
+    month: 7,
+    year: 2025,
+  ),
+    Budget(
+    budgetId: 5,
+    userId: 101,
+    categoryId: 15,
+    categoryName: "Games",
+    amount: 190.0,
+    month: 8,
+    year: 2025,
+  ),
+    Budget(
+    budgetId: 6,
+    userId: 101,
+    categoryId: 11,
+    categoryName: "Saving",
+    amount: 180.0,
+    month: 7,
+    year: 2025,
+  ),
+    Budget(
+    budgetId: 7,
+    userId: 101,
+    categoryId: 15,
+    categoryName: "Games",
+    amount: 170.0,
+    month: 8,
+    year: 2025,
+  ),
+];
