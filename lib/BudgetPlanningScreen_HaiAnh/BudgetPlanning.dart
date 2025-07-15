@@ -1,5 +1,9 @@
+import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/Budget.dart';
+import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/TestDataBudget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart';
 
 class BudgetPlanning extends StatelessWidget{
   @override
@@ -7,10 +11,10 @@ class BudgetPlanning extends StatelessWidget{
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        leading: IconButton(onPressed: (){}, icon: Icon(Icons.arrow_back),color: Colors.black,),// FUNCTION TO NAVIGATE BACK,
-        title: Text("Budget Planning",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.black),),
+        leading: IconButton(onPressed: (){}, icon: Icon(Icons.arrow_back),color: Colors.white,),// FUNCTION TO NAVIGATE BACK,
+        title: Text("Budget Planning",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
         actions: [
-          IconButton(onPressed: (){}, icon: Icon(Icons.add_circle),color: Colors.black,)
+          IconButton(onPressed: (){}, icon: Icon(Icons.add_circle),color: Colors.white,)
         ],
         backgroundColor: Colors.deepPurple,
       ),
@@ -22,23 +26,25 @@ class BudgetPlanning extends StatelessWidget{
 class screenIfNoBudgetExist extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(Icons.radio_button_checked, size: 200, color: Colors.deepPurple),
-        SizedBox(height: 5,),
-        Text("No Budgets Set",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
-        Text("Create your first budget to track spending!"),
-        SizedBox(height: 5,),
-        Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: ElevatedButton(
-           onPressed: (){}, //Navigation to add budget page
-           style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
-           child: Text("+ Set New Budget",style: TextStyle(color: Colors.white),)
-           ),
-        )
-      ],
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.radio_button_checked, size: 200, color: Colors.deepPurple),
+          SizedBox(height: 5,),
+          Text("No Budgets Set",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+          Text("Create your first budget to track spending!"),
+          SizedBox(height: 5,),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: ElevatedButton(
+             onPressed: (){}, //Navigation to add budget page
+             style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
+             child: Text("+ Set New Budget",style: TextStyle(color: Colors.white),)
+             ),
+          )
+        ],
+      ),
     );
   }
 }
@@ -49,20 +55,32 @@ class BudgetPlanningBody extends StatefulWidget{
 }
 
 class _BudgetPlannignBodyState extends State<BudgetPlanningBody>{
-  List<String> mockData = ["Item1","Item2","Item3","Item4","Item5","Item6","Item7","Item8","Item9","Item10"];
-  // List<String> mockData = [];
   int? editingIndex; // Track which index is being edited
   TextEditingController editingController = TextEditingController();
+  List<Budget>? mockData = mockBudgetsJuly;
+
+  DateFormat dateformat = DateFormat("MM/yyyy");
+  DateTime currentDate = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
+    if(mockData!.isEmpty) {return screenIfNoBudgetExist();}
+
+    double totalBudget = mockData!.fold(0.0, (total,budget) => total + budget.amount);
+    double totalSpent = mockData!.fold(0.0, (total,budget) => total + budget.spentAmount);
+    double remaining = totalBudget - totalSpent;
+
+    String presentDate = dateformat.format(currentDate);
+    String minDate = dateformat.format(DateTime(currentDate.year - 1, currentDate.month, currentDate.day));
+
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Container(
           width: 400,
-          padding: EdgeInsets.all(10),
-          margin: EdgeInsets.all(10),
+          padding: EdgeInsets.all(20),
+          margin: EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
             boxShadow: [
@@ -77,13 +95,58 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody>{
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Monthly Oveview",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),),
-              SizedBox(height: 10,),
-              Text("Total budget: "),
-              SizedBox(height: 10,),
-              Text("Total spent: "),
-              SizedBox(height: 10,),
-              Text("Remaining: "),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Monthly Overview",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),),
+                  Text(presentDate, style: TextStyle(fontWeight: FontWeight.bold),),
+                ],
+              ),
+
+              SizedBox(height: 15),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Total budget:"),
+                  Text("$totalBudget đ", style: TextStyle(fontWeight: FontWeight.bold),),
+                ],
+              ),
+
+              SizedBox(height: 15),
+
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Total spent:"),
+                    Text("$totalSpent đ", style: TextStyle(fontWeight: FontWeight.bold),),
+                  ],
+              ),
+
+              SizedBox(height: 15),
+
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Remaining:"),
+                    Text("$remaining đ", style: TextStyle(fontWeight: FontWeight.bold),),
+                  ],
+              ),
+              
+              SizedBox(height: 20,),
+
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color:Colors.deepPurple.shade700,
+                  )
+                ),
+                child: LinearProgressIndicator(
+                  value: totalSpent / totalBudget,
+                  backgroundColor: Colors.deepPurple.shade100,
+                  color: Colors.deepPurple,
+                ),
+              )
             ],
           ),
         ),
@@ -97,16 +160,15 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody>{
         ),
 
 
-        (mockData.isEmpty)? screenIfNoBudgetExist():
         Expanded(
           child: ListView.builder(
-                  itemCount: mockData.length,
+                  itemCount: mockData!.length,
                   itemBuilder: (context, index) {
                     bool isEditing = editingIndex == index;
 
                     return Container(
                       padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.all(10),
+                      margin: EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black, width: 2),
                         borderRadius: BorderRadius.circular(10),
@@ -116,7 +178,10 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody>{
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Expanded(flex: 1, child: Text(mockData[index])),
+                              Expanded(flex: 2, child: Text(mockData![index].categoryName)),
+
+                              Spacer(),
+                              
                               Expanded(
                                 flex: 2,
                                 child: isEditing
@@ -129,11 +194,12 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody>{
                                           FilteringTextInputFormatter.digitsOnly
                                         ],
                                       )
-                                    : Text("200\$"), //REPLACE WITH REAL DATA LATER
+                                    : Text("${mockData![index].spentAmount}/${mockData![index].amount} đ"), //REPLACE WITH REAL DATA LATER
                               ),
+
                               Expanded(
                                 flex: 1,
-                                child: ElevatedButton(
+                                child: IconButton(
                                   onPressed: () {
                                     setState(() {
                                       if (isEditing) {
@@ -141,11 +207,11 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody>{
                                         editingIndex = null; // close editor
                                       } else {
                                         editingIndex = index;
-                                        editingController.text = "200"; // CURRENT VALUE WHEN CANCEL
+                                        editingController.text = mockData![index].amount.toString(); // CURRENT VALUE WHEN CANCEL
                                       }
                                     });
                                   },
-                                  child: Text(isEditing ? "Save" : "Edit"),
+                                  icon: Icon(isEditing? Icons.save:Icons.edit),
                                 ),
                               ),
                             ],
@@ -161,7 +227,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody>{
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     Text(
-                                      "Editing ${mockData[index]} budget",
+                                      "Editing ${mockData![index].categoryName} budget",
                                       style: TextStyle(color: Colors.grey),
                                     ),
 
@@ -169,17 +235,33 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody>{
 
                                     Spacer(),
 
-                                    ElevatedButton(onPressed: (){
+                                    IconButton(onPressed: (){
                                       setState(() {
                                         // DELETE FUNCTION BASE ON ID HERE
                                       });
                                     },
-                                    style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
-                                    child: Text("Delete",style: TextStyle(color: Colors.white),))
+                                    style: IconButton.styleFrom(backgroundColor: Colors.deepPurple),
+                                    icon: Icon(Icons.delete,color: Colors.white))
                                   ],
                                 ),
                               ),
-                            )
+                            ),
+                          
+
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color:Colors.deepPurple.shade700,
+                              )
+                            ),
+                            child: LinearProgressIndicator(
+                              value: mockData![index].spentAmount / mockData![index].amount,
+                              backgroundColor: Colors.deepPurple.shade100,
+                              color: Colors.deepPurple,
+                            ),
+                          )
+
+
                         ],
                       ),
                     );
