@@ -5,16 +5,27 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 
-class BudgetPlanning extends StatelessWidget{
+class BudgetPlanning extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        leading: IconButton(onPressed: (){}, icon: Icon(Icons.arrow_back),color: Colors.white,),// FUNCTION TO NAVIGATE BACK,
-        title: Text("Budget Planning",style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
+        leading: IconButton(
+          onPressed: () {}, // FUNCTION TO NAVIGATE BACK
+          icon: Icon(Icons.arrow_back),
+          color: Colors.white,
+        ),
+        title: Text(
+          "Budget Planning",
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
         actions: [
-          IconButton(onPressed: (){}, icon: Icon(Icons.add_circle),color: Colors.white,)
+          IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.add_circle),
+            color: Colors.white,
+          )
         ],
         backgroundColor: Colors.deepPurple,
       ),
@@ -23,7 +34,7 @@ class BudgetPlanning extends StatelessWidget{
   }
 }
 
-class screenIfNoBudgetExist extends StatelessWidget{
+class screenIfNoBudgetExist extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -31,17 +42,25 @@ class screenIfNoBudgetExist extends StatelessWidget{
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.radio_button_checked, size: 200, color: Colors.deepPurple),
-          SizedBox(height: 5,),
-          Text("No Budgets Set",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+
+          SizedBox(height: 5),
+
+          Text(
+            "No Budgets Set",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
+
           Text("Create your first budget to track spending!"),
-          SizedBox(height: 5,),
+
+          SizedBox(height: 5),
+
           Padding(
             padding: const EdgeInsets.all(10.0),
             child: ElevatedButton(
-             onPressed: (){}, //Navigation to add budget page
-             style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
-             child: Text("+ Set New Budget",style: TextStyle(color: Colors.white),)
-             ),
+              onPressed: () {}, //Navigation to add budget page
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
+              child: Text("+ Set New Budget", style: TextStyle(color: Colors.white)),
+            ),
           )
         ],
       ),
@@ -49,100 +68,106 @@ class screenIfNoBudgetExist extends StatelessWidget{
   }
 }
 
-class BudgetPlanningBody extends StatefulWidget{
+
+
+class BudgetPlanningBody extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _BudgetPlannignBodyState();
 }
 
-class _BudgetPlannignBodyState extends State<BudgetPlanningBody>{
-  int? editingIndex; // Track which index is being edited
-  TextEditingController editingController = TextEditingController();
-  List<Budget>? mockData = mockBudgetsJuly;
 
-  DateFormat dateformat = DateFormat("MM/yyyy");
+
+class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
+  int? editingIndex;
+  TextEditingController editingController = TextEditingController();
+  List<Budget>? allBudgets = mockBudgetsJuly;
+
+  DateFormat dateFormat = DateFormat("MM/yyyy");
   DateTime currentDate = DateTime.now();
+  DateTime pickedDate = DateTime.now();
+
+  bool isEditable(DateTime date) {
+    final now = currentDate;
+    final lastMonth = DateTime(now.year, now.month - 1);
+    return (date.year == now.year && date.month == now.month) ||
+        (date.year == lastMonth.year && date.month == lastMonth.month);
+  }
+
+  void _showMonthPicker() async {
+    final selected = await showMonthPicker(
+      context: context,
+      initialDate: pickedDate,
+      firstDate: DateTime(currentDate.year - 1,currentDate.month),
+      lastDate: currentDate,
+    );
+    if (selected != null) {
+      setState(() {
+        pickedDate = selected;
+        allBudgets = mockBudgetsJuly; // replace with actual function that fetch data in database;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    if(mockData!.isEmpty) {return screenIfNoBudgetExist();}
+    if (allBudgets == null || allBudgets!.isEmpty) {
+      return screenIfNoBudgetExist();
+    }
 
-    double totalBudget = mockData!.fold(0.0, (total,budget) => total + budget.amount);
-    double totalSpent = mockData!.fold(0.0, (total,budget) => total + budget.spentAmount);
+    double totalBudget = allBudgets!.fold(0.0, (total, budget) => total + budget.amount);
+    double totalSpent = allBudgets!.fold(0.0, (total, budget) => total + budget.spentAmount);
     double remaining = totalBudget - totalSpent;
 
-    String presentDate = dateformat.format(currentDate);
-    String minDate = dateformat.format(DateTime(currentDate.year - 1, currentDate.month, currentDate.day));
-
-
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Container(
           width: 400,
           padding: EdgeInsets.all(20),
           margin: EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey,
-                spreadRadius: 2,
-                blurRadius: 6,
-              ),
-            ],
-            borderRadius: BorderRadius.circular(20)
-          ),
+              color: Colors.white,
+              boxShadow: [BoxShadow(color: Colors.grey, spreadRadius: 2, blurRadius: 6)],
+              borderRadius: BorderRadius.circular(20)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Header with month picker
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Monthly Overview",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),),
-                  Text(presentDate, style: TextStyle(fontWeight: FontWeight.bold),),
+                  Text("Monthly Overview", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                  TextButton.icon(
+                    onPressed: _showMonthPicker,
+                    icon: Icon(Icons.calendar_today, color: Colors.deepPurple),
+                    label: Text(
+                      dateFormat.format(pickedDate),
+                      style: TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold),
+                    ),
+                  )
                 ],
               ),
-
               SizedBox(height: 15),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Total budget:"),
-                  Text("$totalBudget đ", style: TextStyle(fontWeight: FontWeight.bold),),
-                ],
-              ),
-
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                Text("Total budget:"),
+                Text("$totalBudget đ", style: TextStyle(fontWeight: FontWeight.bold)),
+              ]),
               SizedBox(height: 15),
-
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Total spent:"),
-                    Text("$totalSpent đ", style: TextStyle(fontWeight: FontWeight.bold),),
-                  ],
-              ),
-
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                Text("Total spent:"),
+                Text("$totalSpent đ", style: TextStyle(fontWeight: FontWeight.bold)),
+              ]),
               SizedBox(height: 15),
-
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Remaining:"),
-                    Text("$remaining đ", style: TextStyle(fontWeight: FontWeight.bold),),
-                  ],
-              ),
-              
-              SizedBox(height: 20,),
-
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                Text("Remaining:"),
+                Text("$remaining đ", style: TextStyle(fontWeight: FontWeight.bold)),
+              ]),
+              SizedBox(height: 20),
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color:Colors.deepPurple.shade700,
-                  )
+                  border: Border.all(color: Colors.deepPurple.shade700),
                 ),
                 child: LinearProgressIndicator(
-                  value: totalSpent / totalBudget,
+                  value: totalBudget == 0 ? 0 : totalSpent / totalBudget,
                   backgroundColor: Colors.deepPurple.shade100,
                   color: Colors.deepPurple,
                 ),
@@ -150,125 +175,103 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody>{
             ],
           ),
         ),
-
-        Divider(
-          height: 10,
-          thickness: 2,
-          color: Colors.grey,
-          indent: 10,
-          endIndent: 10,
-        ),
-
-
+        Divider(height: 10, thickness: 2, color: Colors.grey, indent: 10, endIndent: 10),
         Expanded(
           child: ListView.builder(
-                  itemCount: mockData!.length,
-                  itemBuilder: (context, index) {
-                    bool isEditing = editingIndex == index;
+            itemCount: allBudgets!.length,
+            itemBuilder: (context, index) {
+              bool isEditing = editingIndex == index;
+              var budget = allBudgets![index];
 
-                    return Container(
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 2),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+              return Container(
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black, width: 2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(flex: 2, child: Text(budget.categoryName)),
+
+                        Spacer(),
+
+                        Expanded(
+                          flex: 2,
+                          child: isEditing
+                              ? TextField(
+                                  controller: editingController,
+                                  decoration: InputDecoration(hintText: "Enter new amount"),
+                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                )
+                              : Text("${budget.spentAmount}/${budget.amount} đ",style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: (budget.spentAmount>budget.amount)? Colors.red:Colors.green
+                                ),),
+                        ),
+
+                        if (isEditable(pickedDate))
+                          Expanded(
+                            flex: 1,
+                            child: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  if (isEditing) {
+                                    // UPDATE DATA FUNCTION HERE
+                                    editingIndex = null;
+                                  } else {
+                                    editingIndex = index;
+                                    editingController.text = budget.amount.toString();
+                                  }
+                                });
+                              },
+                              icon: Icon(isEditing ? Icons.save : Icons.edit),
+                            ),
+                          ),
+                      ],
+                    ),
+                    if (isEditing)
+                      Align(
+                        alignment: Alignment.center,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: Row(
                             children: [
-                              Expanded(flex: 2, child: Text(mockData![index].categoryName)),
-
+                              Text("Editing ${budget.categoryName} budget", style: TextStyle(color: Colors.grey)),
                               Spacer(),
-                              
-                              Expanded(
-                                flex: 2,
-                                child: isEditing
-                                    ? TextField(
-                                        controller: editingController,
-                                        decoration: InputDecoration(
-                                          hintText: "Enter new amount",
-                                        ),
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter.digitsOnly
-                                        ],
-                                      )
-                                    : Text("${mockData![index].spentAmount}/${mockData![index].amount} đ"), //REPLACE WITH REAL DATA LATER
-                              ),
-
-                              Expanded(
-                                flex: 1,
-                                child: IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      if (isEditing) {
-                                        // UPDATE DATA FUNCTION HERE
-                                        editingIndex = null; // close editor
-                                      } else {
-                                        editingIndex = index;
-                                        editingController.text = mockData![index].amount.toString(); // CURRENT VALUE WHEN CANCEL
-                                      }
-                                    });
-                                  },
-                                  icon: Icon(isEditing? Icons.save:Icons.edit),
-                                ),
-                              ),
+                              IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    // DELETE FUNCTION BASE ON ID HERE
+                                  });
+                                },
+                                style: IconButton.styleFrom(backgroundColor: Colors.deepPurple),
+                                icon: Icon(Icons.delete, color: Colors.white),
+                              )
                             ],
                           ),
-
-                          // Optional extra row if you want to animate or show more
-                          if (isEditing)
-                            Align(
-                              alignment: Alignment.center,
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: 10.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      "Editing ${mockData![index].categoryName} budget",
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-
-                                    SizedBox(width: 10,),
-
-                                    Spacer(),
-
-                                    IconButton(onPressed: (){
-                                      setState(() {
-                                        // DELETE FUNCTION BASE ON ID HERE
-                                      });
-                                    },
-                                    style: IconButton.styleFrom(backgroundColor: Colors.deepPurple),
-                                    icon: Icon(Icons.delete,color: Colors.white))
-                                  ],
-                                ),
-                              ),
-                            ),
-                          
-
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color:Colors.deepPurple.shade700,
-                              )
-                            ),
-                            child: LinearProgressIndicator(
-                              value: mockData![index].spentAmount / mockData![index].amount,
-                              backgroundColor: Colors.deepPurple.shade100,
-                              color: Colors.deepPurple,
-                            ),
-                          )
-
-
-                        ],
+                        ),
                       ),
-                    );
-                  },
+                      
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.deepPurple.shade700),
+                      ),
+                      child: LinearProgressIndicator(
+                        value: (budget.amount == 0)?   0 : budget.spentAmount / budget.amount,
+                        backgroundColor: Colors.deepPurple.shade100,
+                        color: Colors.deepPurple,
+                      ),
+                    )
+                  ],
                 ),
-              ),
-        
+              );
+            },
+          ),
+        ),
       ],
     );
   }
