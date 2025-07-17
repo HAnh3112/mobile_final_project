@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
+import 'AddBudgetScreen.dart';
 
 class BudgetPlanning extends StatelessWidget {
   @override
@@ -12,7 +13,10 @@ class BudgetPlanning extends StatelessWidget {
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         leading: IconButton(
-          onPressed: () {}, // FUNCTION TO NAVIGATE BACK
+          onPressed: () {
+            Navigator.pop(context); //Navigate back to dashboard
+          },
+
           icon: Icon(Icons.arrow_back),
           color: Colors.white,
         ),
@@ -20,13 +24,6 @@ class BudgetPlanning extends StatelessWidget {
           "Budget Planning",
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.add_circle),
-            color: Colors.white,
-          )
-        ],
         backgroundColor: Colors.deepPurple,
       ),
       body: BudgetPlanningBody(),
@@ -34,7 +31,12 @@ class BudgetPlanning extends StatelessWidget {
   }
 }
 
-class screenIfNoBudgetExist extends StatelessWidget {
+class screenIfNoBudgetExist extends StatefulWidget{
+  @override
+  State<StatefulWidget> createState() => _screenIfNoBudgetExistState();
+}
+
+class _screenIfNoBudgetExistState extends State<screenIfNoBudgetExist> {
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -57,9 +59,20 @@ class screenIfNoBudgetExist extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(10.0),
             child: ElevatedButton(
-              onPressed: () {}, //Navigation to add budget page
+              onPressed: () {
+                Navigator.push(
+                  context, 
+                  MaterialPageRoute(builder: (context) => AddBudgetScreen())
+                ).then((result){
+                  if(result == true){
+                    setState(() {
+                      
+                    });
+                  }
+                });
+              },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
-              child: Text("+ Set New Budget", style: TextStyle(color: Colors.white)),
+              child: Text("Set New Budget +", style: TextStyle(color: Colors.white)),
             ),
           )
         ],
@@ -110,6 +123,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
 
   @override
   Widget build(BuildContext context) {
+    //If no budget found will return a blank page
     if (allBudgets == null || allBudgets!.isEmpty) {
       return screenIfNoBudgetExist();
     }
@@ -120,10 +134,13 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
 
     return Column(
       children: [
+        
+
+        //Monthly Overview
         Container(
           width: 400,
           padding: EdgeInsets.all(20),
-          margin: EdgeInsets.all(20),
+          margin: EdgeInsets.fromLTRB(20,20,20,10),
           decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [BoxShadow(color: Colors.grey, spreadRadius: 2, blurRadius: 6)],
@@ -159,7 +176,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
               SizedBox(height: 15),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 Text("Remaining:"),
-                Text("$remaining đ", style: TextStyle(fontWeight: FontWeight.bold)),
+                Text("$remaining đ", style: TextStyle(fontWeight: FontWeight.bold,color: (remaining<0)? Colors.red:Colors.green)),
               ]),
               SizedBox(height: 20),
               Container(
@@ -175,7 +192,36 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
             ],
           ),
         ),
+
+        //Navigate to adding budget screen
+        Container(
+          width: 400,
+          margin: EdgeInsets.symmetric(horizontal: 20),
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (context) => AddBudgetScreen())
+              ).then((result){
+                if(result == true){
+                  setState(() {
+                    
+                  });
+                }
+              });
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
+            child: Text("Set new budget +",style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+          ),
+        ),
+
+        SizedBox(height: 10,),
+
+
         Divider(height: 10, thickness: 2, color: Colors.grey, indent: 10, endIndent: 10),
+
+
+        //Budget List
         Expanded(
           child: ListView.builder(
             itemCount: allBudgets!.length,
@@ -208,7 +254,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                                 )
                               : Text("${budget.spentAmount}/${budget.amount} đ",style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: (budget.spentAmount>budget.amount)? Colors.red:Colors.green
+                                color: (budget.spentAmount > budget.amount)? Colors.red:Colors.green
                                 ),),
                         ),
 
