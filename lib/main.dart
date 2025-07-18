@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/BudgetPlanning.dart';
-import 'package:final_project/BudgetPlanningScreen_HaiAnh/EditScreen.dart';
+import 'package:final_project/BudgetPlanningScreen_HaiAnh/AddBudgetScreen.dart';
 import 'screens_Giap/auth_screen.dart';
 import 'screens_Giap/category_management_screen.dart';
 
@@ -12,19 +12,8 @@ void main() {
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Demo App',
-
-      // Chọn màn hình muốn chạy ở đây:
-      //home: const AuthScreen(),
-
-      //home: const AddTransactionScreen(),
-      //home: const DashboardScreen(),
-
-      //home: BudgetPlanning(),
-      //home: Editscreen(),
-      home: CategoryManagementScreen(),
-
-      //home: TransactionHistoryScreen(), // Transaction History Screen
+      title: 'Demo App 2',
+      home: const AuthScreen(),
     ),
   );
 }

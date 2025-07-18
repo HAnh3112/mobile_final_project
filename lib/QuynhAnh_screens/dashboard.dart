@@ -1,10 +1,10 @@
 // lib/dashboard_screen.dart
+import 'package:final_project/BudgetPlanningScreen_HaiAnh/BudgetPlanning.dart';
+import 'package:final_project/DoanAnhVu/transaction_history_screen.dart';
+import 'package:final_project/QuynhAnh_screens/add_transaction_screen.dart';
+import 'package:final_project/screens_Giap/category_management_screen.dart';
 import 'package:flutter/material.dart';
 
-// Import các màn hình khác nếu cần điều hướng từ đây
-// import 'package:your_app_name/add_transaction_screen.dart'; // Ví dụ
-// import 'package:your_app_name/charts_screen.dart'; // Ví dụ
-// import 'package:your_app_name/history_screen.dart'; // Ví dụ
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -14,6 +14,11 @@ class DashboardScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[100], // Màu nền tổng thể
       appBar: AppBar(
+        leading: IconButton(onPressed: (){
+          Navigator.pop(context);
+        }, 
+        icon: Icon(Icons.logout,color: Colors.red,)
+        ),
         backgroundColor: Colors.grey[100], // Match scaffold background
         elevation: 0, // Bỏ đường kẻ dưới AppBar
         title: const Column(
@@ -71,7 +76,7 @@ class DashboardScreen extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: () {
                       // Navigate to Add Transaction screen
-                      // Navigator.push(context, MaterialPageRoute(builder: (context) => const AddTransactionScreen()));
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => AddTransactionScreen()));
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Add Transaction'),
@@ -117,7 +122,7 @@ class DashboardScreen extends StatelessWidget {
 
             // Recent Transactions
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const Text(
                   'Recent Transactions',
@@ -126,20 +131,7 @@ class DashboardScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // Navigate to View All Transactions
-                  },
-                  child: const Text(
-                    'View All',
-                    style: TextStyle(
-                      color: Colors.deepPurple, // Màu tím như hình
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+                )
               ],
             ),
             const SizedBox(height: 10),
@@ -208,7 +200,10 @@ class DashboardScreen extends StatelessWidget {
                   label: 'History',
                   onTap: () {
                     // Navigate to History Screen
-                    // Navigator.push(context, MaterialPageRoute(builder: (context) => const HistoryScreen()));
+                    Navigator.push(
+                      context, 
+                      MaterialPageRoute(builder: (context) => TransactionHistoryScreen())
+                    );
                   },
                 ),
                 _buildFeatureCard(
@@ -217,6 +212,10 @@ class DashboardScreen extends StatelessWidget {
                   label: 'Budget',
                   onTap: () {
                     // Navigate to Budget Screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => BudgetPlanning())
+                    );
                   },
                 ),
                 _buildFeatureCard(
@@ -225,6 +224,10 @@ class DashboardScreen extends StatelessWidget {
                   label: 'Categories',
                   onTap: () {
                     // Navigate to Categories Screen
+                    Navigator.push(
+                      context, 
+                      MaterialPageRoute(builder: (context) => CategoryManagementScreen())
+                    );
                   },
                 ),
                 _buildFeatureCard(

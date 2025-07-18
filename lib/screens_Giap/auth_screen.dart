@@ -1,3 +1,4 @@
+import 'package:final_project/QuynhAnh_screens/dashboard.dart';
 import 'package:flutter/material.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -123,7 +124,11 @@ class _AuthScreenState extends State<AuthScreen>
         buildPasswordInput(),
         const SizedBox(height: 24),
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () {
+            //Need check if password is correct or not, if correct:
+            Navigator.push(context, 
+            MaterialPageRoute(builder: (context) => DashboardScreen()));
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue[600],
             minimumSize: const Size.fromHeight(48),
