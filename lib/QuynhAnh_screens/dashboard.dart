@@ -4,60 +4,65 @@ import 'package:final_project/DoanAnhVu/transaction_history_screen.dart';
 import 'package:final_project/QuynhAnh_screens/add_transaction_screen.dart';
 import 'package:final_project/screens_Giap/category_management_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:final_project/ThemeChanging_HaiAnh/theme.dart';
+import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 
+class DashboardScreen extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _DashboardScreenState();
+}
 
-class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
-
+class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100], // Màu nền tổng thể
+      backgroundColor: currentTheme.background_color,
       appBar: AppBar(
-        leading: IconButton(onPressed: (){
-          Navigator.pop(context);
-        }, 
-        icon: Icon(Icons.logout,color: Colors.red,)
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(Icons.logout, color: Colors.red),
         ),
-        backgroundColor: Colors.grey[100], // Match scaffold background
-        elevation: 0, // Bỏ đường kẻ dưới AppBar
-        title: const Column(
+        backgroundColor: currentTheme.background_color,
+        elevation: 0,
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Dashboard',
               style: TextStyle(
-                color: Colors.black,
+                color: currentTheme.main_text_color,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
-              'Welcome back!',
-              style: TextStyle(color: Colors.grey, fontSize: 16),
+              'Welcome back!', //USER'S USERNAME HERE
+              style: TextStyle(color: currentTheme.sub_text_color, fontSize: 16),
             ),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.palette_outlined, color: Colors.black54),
-            onPressed: () {
-              // Handle icon press
-            },
+            icon: Icon(Icons.palette_outlined, color: currentTheme.sub_text_color),
+            onPressed: () {setState(() {
+              if(currentTheme == lightTheme){
+                currentTheme = darkTheme;
+              }else{
+                currentTheme = lightTheme;
+              }
+            });},
           ),
           IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.black54),
-            onPressed: () {
-              // Handle icon press
-            },
+            icon: Icon(Icons.notifications_none, color: currentTheme.sub_text_color),
+            onPressed: () {},
           ),
           IconButton(
-            icon: const Icon(Icons.settings, color: Colors.black54),
-            onPressed: () {
-              // Handle icon press
-            },
+            icon: Icon(Icons.settings, color: currentTheme.sub_text_color),
+            onPressed: () {},
           ),
-          const SizedBox(width: 8), // Khoảng trống cuối cùng
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
@@ -65,24 +70,23 @@ class DashboardScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Current Balance Card
             _buildBalanceCard(context),
             const SizedBox(height: 20),
-
-            // Action Buttons (Add Transaction, View Charts)
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      // Navigate to Add Transaction screen
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => AddTransactionScreen()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AddTransactionScreen()),
+                      );
                     },
                     icon: const Icon(Icons.add),
                     label: const Text('Add Transaction'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green[600], // Màu nền xanh
-                      foregroundColor: Colors.white, // Màu chữ và icon
+                      backgroundColor: currentTheme.main_button_color,
+                      foregroundColor: currentTheme.main_button_text_color,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -97,21 +101,18 @@ class DashboardScreen extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {
-                      // Navigate to View Charts screen
-                      // Navigator.push(context, MaterialPageRoute(builder: (context) => const ChartsScreen()));
-                    },
-                    icon: const Icon(Icons.bar_chart, color: Colors.black87),
-                    label: const Text(
+                    onPressed: () {},
+                    icon: Icon(Icons.bar_chart, color: currentTheme.main_text_color),
+                    label: Text(
                       'View Charts',
-                      style: TextStyle(color: Colors.black87),
+                      style: TextStyle(color: currentTheme.main_text_color),
                     ),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      side: BorderSide(color: Colors.grey[400]!), // Viền
+                      side: BorderSide(color: currentTheme.sub_text_color),
                       textStyle: const TextStyle(fontSize: 16),
                     ),
                   ),
@@ -119,91 +120,68 @@ class DashboardScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 30),
-
-            // Recent Transactions
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Recent Transactions',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: currentTheme.main_text_color,
                   ),
                 )
               ],
             ),
             const SizedBox(height: 10),
-            // Placeholder for transactions if empty
             Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20.0),
                 child: Text(
                   'No transactions yet',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                  style: TextStyle(color: currentTheme.sub_text_color, fontSize: 16),
                 ),
               ),
             ),
-
-            // Nếu có dữ liệu giao dịch, bạn sẽ dùng ListView.builder ở đây
-            // Ví dụ:
-            // ListView.builder(
-            //   shrinkWrap: true, // Quan trọng khi dùng trong SingleChildScrollView
-            //   physics: NeverScrollableScrollPhysics(), // Vô hiệu hóa cuộn riêng của ListView
-            //   itemCount: transactions.length,
-            //   itemBuilder: (context, index) {
-            //     return TransactionItem(transaction: transactions[index]);
-            //   },
-            // ),
             const SizedBox(height: 30),
-
-            // Monthly Summary Cards
             Row(
               children: [
                 Expanded(
                   child: _buildMonthlySummaryCard(
                     icon: Icons.add_circle_outline,
-                    color: Colors.green[400]!, // Màu xanh nhạt
+                    color: Colors.green[400]!,
                     label: 'This Month',
                     amount: '+\$0',
-                    iconBgColor: Colors.green[100]!, // Nền icon xanh nhạt
+                    iconBgColor: Colors.green[100]!,
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: _buildMonthlySummaryCard(
                     icon: Icons.remove_circle_outline,
-                    color: Colors.red[400]!, // Màu đỏ nhạt
+                    color: Colors.red[400]!,
                     label: 'This Month',
                     amount: '-\$0',
-                    iconBgColor: Colors.red[100]!, // Nền icon đỏ nhạt
+                    iconBgColor: Colors.red[100]!,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 20),
-
-            // Grid of Feature Cards
             GridView.count(
               shrinkWrap: true,
-              physics:
-                  const NeverScrollableScrollPhysics(), // Vô hiệu hóa cuộn riêng của GridView
+              physics: const NeverScrollableScrollPhysics(),
               crossAxisCount: 2,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
-              childAspectRatio: 1.5, // Tỷ lệ chiều rộng/chiều cao của mỗi item
+              childAspectRatio: 1.5,
               children: [
                 _buildFeatureCard(
                   context,
                   icon: Icons.history,
                   label: 'History',
                   onTap: () {
-                    // Navigate to History Screen
-                    Navigator.push(
-                      context, 
-                      MaterialPageRoute(builder: (context) => TransactionHistoryScreen())
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => TransactionHistoryScreen()));
                   },
                 ),
                 _buildFeatureCard(
@@ -211,11 +189,7 @@ class DashboardScreen extends StatelessWidget {
                   icon: Icons.pie_chart_outline,
                   label: 'Budget',
                   onTap: () {
-                    // Navigate to Budget Screen
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => BudgetPlanning())
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => BudgetPlanning()));
                   },
                 ),
                 _buildFeatureCard(
@@ -223,20 +197,14 @@ class DashboardScreen extends StatelessWidget {
                   icon: Icons.category_outlined,
                   label: 'Categories',
                   onTap: () {
-                    // Navigate to Categories Screen
-                    Navigator.push(
-                      context, 
-                      MaterialPageRoute(builder: (context) => CategoryManagementScreen())
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => CategoryManagementScreen()));
                   },
                 ),
                 _buildFeatureCard(
                   context,
                   icon: Icons.notifications_active_outlined,
                   label: 'Reminders',
-                  onTap: () {
-                    // Navigate to Reminders Screen
-                  },
+                  onTap: () {},
                 ),
               ],
             ),
@@ -250,14 +218,7 @@ class DashboardScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.deepPurple[400]!, // Tím đậm
-            Colors.deepPurple[200]!, // Tím nhạt hơn
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        gradient: currentTheme.elevated_background_color,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -308,7 +269,7 @@ class DashboardScreen extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(color: Colors.white54, fontSize: 14),
+          style: TextStyle(color: Colors.white54, fontSize: 14),
         ),
         const SizedBox(height: 4),
         Text(
@@ -332,8 +293,8 @@ class DashboardScreen extends StatelessWidget {
   }) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 0, // Bỏ đổ bóng
-      color: Colors.white, // Màu nền thẻ
+      elevation: 0,
+      color: currentTheme.sub_button_color,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -347,7 +308,7 @@ class DashboardScreen extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               label,
-              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+              style: TextStyle(color: currentTheme.sub_button_text_color, fontSize: 14),
             ),
             const SizedBox(height: 4),
             Text(
@@ -375,7 +336,7 @@ class DashboardScreen extends StatelessWidget {
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 0,
-        color: Colors.white,
+        color: currentTheme.sub_button_color,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -384,7 +345,7 @@ class DashboardScreen extends StatelessWidget {
               backgroundColor: Colors.grey[200],
               child: Icon(
                 icon,
-                color: Colors.grey[700], // Màu icon
+                color: Colors.black54,
                 size: 30,
               ),
             ),
@@ -392,7 +353,7 @@ class DashboardScreen extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: Colors.grey[800],
+                color: currentTheme.sub_button_text_color,
                 fontWeight: FontWeight.w600,
                 fontSize: 15,
               ),
