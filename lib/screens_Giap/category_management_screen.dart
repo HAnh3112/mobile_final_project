@@ -13,6 +13,15 @@ class Category {
     required this.icon,
     required this.color,
   });
+
+  Category copyWith({String? name, String? icon, Color? color}) {
+    return Category(
+      id: id,
+      name: name ?? this.name,
+      icon: icon ?? this.icon,
+      color: color ?? this.color,
+    );
+  }
 }
 
 class CategoryManagementScreen extends StatefulWidget {
@@ -56,16 +65,16 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     Color(0xFF98D8C8),
   ];
 
-  void _showAddDialog() {
-    _nameController.clear();
-    _selectedIcon = null;
-    _selectedColor = const Color(0xFFFF6B6B);
+  void _showCategoryDialog({Category? existing}) {
+    _nameController.text = existing?.name ?? '';
+    _selectedIcon = existing?.icon;
+    _selectedColor = existing?.color ?? const Color(0xFFFF6B6B);
 
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setStateDialog) => AlertDialog(
-          title: const Text("Add New Category"),
+          title: Text(existing == null ? "Add New Category" : "Edit Category"),
           content: SingleChildScrollView(
             child: Column(
               children: [
@@ -82,11 +91,42 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                   spacing: 8,
                   runSpacing: 8,
                   children: commonIcons.map((icon) {
-                    return ChoiceChip(
-                      label: Text(icon, style: const TextStyle(fontSize: 20)),
-                      selected: _selectedIcon == icon,
-                      onSelected: (_) =>
-                          setStateDialog(() => _selectedIcon = icon),
+                    final isSelected = _selectedIcon == icon;
+
+                    final isUsedByOther = _categories.any(
+                      (cat) =>
+                          cat.icon == icon &&
+                          (existing == null || cat.id != existing.id),
+                    );
+                    final isDisabled = isUsedByOther;
+
+                    return Stack(
+                      alignment: Alignment.topRight,
+                      children: [
+                        ChoiceChip(
+                          label: Text(
+                            icon,
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                          selected: isSelected,
+                          onSelected: isDisabled
+                              ? null
+                              : (_) =>
+                                    setStateDialog(() => _selectedIcon = icon),
+                          selectedColor: Colors.blue.shade100,
+                          disabledColor: Colors.grey.shade200,
+                        ),
+                        if (isSelected)
+                          const Positioned(
+                            top: -4,
+                            right: -4,
+                            child: Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Colors.black,
+                            ),
+                          ),
+                      ],
                     );
                   }).toList(),
                 ),
@@ -128,18 +168,55 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (_nameController.text.isNotEmpty && _selectedIcon != null) {
+                final name = _nameController.text.trim();
+                if (name.isEmpty || _selectedIcon == null) return;
+
+                final nameExists = _categories.any(
+                  (cat) =>
+                      cat.name.toLowerCase() == name.toLowerCase() &&
+                      (existing == null || cat.id != existing.id),
+                );
+
+                final iconExists = _categories.any(
+                  (cat) =>
+                      cat.icon == _selectedIcon &&
+                      (existing == null || cat.id != existing.id),
+                );
+
+                if (nameExists || iconExists) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Name or icon already exists'),
+                    ),
+                  );
+                  return;
+                }
+
+                if (existing != null) {
+                  final updated = existing.copyWith(
+                    name: name,
+                    icon: _selectedIcon!,
+                    color: _selectedColor,
+                  );
+                  setState(() {
+                    final index = _categories.indexWhere(
+                      (c) => c.id == existing.id,
+                    );
+                    _categories[index] = updated;
+                  });
+                } else {
                   final newCategory = Category(
                     id: const Uuid().v4(),
-                    name: _nameController.text,
+                    name: name,
                     icon: _selectedIcon!,
                     color: _selectedColor,
                   );
                   setState(() => _categories.add(newCategory));
-                  Navigator.pop(context);
                 }
+
+                Navigator.pop(context);
               },
-              child: const Text("Add"),
+              child: Text(existing == null ? "Add" : "Save"),
             ),
           ],
         ),
@@ -148,9 +225,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
   }
 
   void _deleteCategory(String id) {
-    setState(() {
-      _categories.removeWhere((cat) => cat.id == id);
-    });
+    setState(() => _categories.removeWhere((cat) => cat.id == id));
   }
 
   @override
@@ -160,7 +235,10 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
         leading: const BackButton(),
         title: const Text("Categories"),
         actions: [
-          IconButton(icon: const Icon(Icons.add), onPressed: _showAddDialog),
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => _showCategoryDialog(),
+          ),
         ],
       ),
       body: _categories.isEmpty
@@ -176,7 +254,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                   const Text("Add your first category to get started"),
                   const SizedBox(height: 12),
                   ElevatedButton.icon(
-                    onPressed: _showAddDialog,
+                    onPressed: () => _showCategoryDialog(),
                     icon: const Icon(Icons.add),
                     label: const Text("Add Category"),
                   ),
@@ -199,9 +277,19 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                     ),
                     title: Text(category.name),
                     subtitle: const Text("Category"),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () => _deleteCategory(category.id),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () =>
+                              _showCategoryDialog(existing: category),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _deleteCategory(category.id),
+                        ),
+                      ],
                     ),
                   ),
                 );
