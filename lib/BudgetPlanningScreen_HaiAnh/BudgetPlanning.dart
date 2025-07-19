@@ -1,5 +1,6 @@
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/Budget.dart';
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/TestDataBudget.dart';
+import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -10,7 +11,7 @@ class BudgetPlanning extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: currentTheme.background_color,
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
@@ -24,7 +25,7 @@ class BudgetPlanning extends StatelessWidget {
           "Budget Planning",
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: currentTheme.tab_bar_color,
       ),
       body: BudgetPlanningBody(),
     );
@@ -49,10 +50,10 @@ class _screenIfNoBudgetExistState extends State<screenIfNoBudgetExist> {
 
           Text(
             "No Budgets Set",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: currentTheme.main_text_color),
           ),
 
-          Text("Create your first budget to track spending!"),
+          Text("Create your first budget to track spending!", style: TextStyle(color: currentTheme.main_text_color),),
 
           SizedBox(height: 5),
 
@@ -71,8 +72,8 @@ class _screenIfNoBudgetExistState extends State<screenIfNoBudgetExist> {
                   }
                 });
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
-              child: Text("Set New Budget +", style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(backgroundColor: currentTheme.main_button_color),
+              child: Text("Set New Budget +", style: TextStyle(color: currentTheme.main_button_text_color)),
             ),
           )
         ],
@@ -93,7 +94,7 @@ class BudgetPlanningBody extends StatefulWidget {
 class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
   int? editingIndex;
   TextEditingController editingController = TextEditingController();
-  List<Budget>? allBudgets = mockBudgetsJuly;
+  List<Budget>? allBudgets = mockBudgetBlank;
 
   DateFormat dateFormat = DateFormat("MM/yyyy");
   DateTime currentDate = DateTime.now();
@@ -142,7 +143,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
           padding: EdgeInsets.all(20),
           margin: EdgeInsets.fromLTRB(20,20,20,10),
           decoration: BoxDecoration(
-              color: Colors.white,
+              gradient: currentTheme.elevated_background_color,
               boxShadow: [BoxShadow(color: Colors.grey, spreadRadius: 2, blurRadius: 6)],
               borderRadius: BorderRadius.circular(20)),
           child: Column(
@@ -152,31 +153,37 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Monthly Overview", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                  Text("Monthly Overview", 
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold, 
+                      fontSize: 20,
+                      color: Colors.white70
+                    )
+                  ),
                   TextButton.icon(
                     onPressed: _showMonthPicker,
-                    icon: Icon(Icons.calendar_today, color: Colors.deepPurple),
+                    icon: Icon(Icons.calendar_today, color: Colors.white),
                     label: Text(
                       dateFormat.format(pickedDate),
-                      style: TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   )
                 ],
               ),
               SizedBox(height: 15),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text("Total budget:"),
-                Text("$totalBudget đ", style: TextStyle(fontWeight: FontWeight.bold)),
+                Text("Total budget:", style: TextStyle(color: Colors.white70),),
+                Text("$totalBudget đ", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
               ]),
               SizedBox(height: 15),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text("Total spent:"),
-                Text("$totalSpent đ", style: TextStyle(fontWeight: FontWeight.bold)),
+                Text("Total spent:", style: TextStyle(color: Colors.white70)),
+                Text("$totalSpent đ", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
               ]),
               SizedBox(height: 15),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text("Remaining:"),
-                Text("$remaining đ", style: TextStyle(fontWeight: FontWeight.bold,color: (remaining<0)? Colors.red:Colors.green)),
+                Text("Remaining:", style: TextStyle(color: Colors.white70)),
+                Text("$remaining đ", style: TextStyle(fontWeight: FontWeight.bold,color: (remaining<0)? Colors.redAccent:Colors.greenAccent)),
               ]),
               SizedBox(height: 20),
               Container(
@@ -210,15 +217,15 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                 }
               });
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
-            child: Text("Set new budget +",style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+            style: ElevatedButton.styleFrom(backgroundColor: currentTheme.main_button_color),
+            child: Text("Set new budget +",style: TextStyle(color: currentTheme.main_button_text_color, fontWeight: FontWeight.bold),),
           ),
         ),
 
         SizedBox(height: 10,),
 
 
-        Divider(height: 10, thickness: 2, color: Colors.grey, indent: 10, endIndent: 10),
+        Divider(height: 10, thickness: 2, color: Colors.grey, indent: 22, endIndent: 22),
 
 
         //Budget List
@@ -233,14 +240,17 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                 padding: EdgeInsets.all(10),
                 margin: EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black, width: 2),
+                  border: Border.all(color: currentTheme.sub_button_text_color, width: 2),
                   borderRadius: BorderRadius.circular(10),
+                  color: currentTheme.sub_button_color
                 ),
                 child: Column(
                   children: [
                     Row(
                       children: [
-                        Expanded(flex: 2, child: Text(budget.categoryName)),
+                        Expanded(flex: 2, child: Text(budget.categoryName, 
+                          style: TextStyle(color: currentTheme.sub_button_text_color),)
+                        ),
 
                         Spacer(),
 
@@ -249,6 +259,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                           child: isEditing
                               ? TextField(
                                   controller: editingController,
+                                  style: TextStyle(color: currentTheme.sub_button_text_color),
                                   decoration: InputDecoration(hintText: "Enter new amount"),
                                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                                 )
@@ -273,7 +284,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                                   }
                                 });
                               },
-                              icon: Icon(isEditing ? Icons.save : Icons.edit),
+                              icon: Icon(isEditing ? Icons.save : Icons.edit, color: currentTheme.sub_button_text_color,),
                             ),
                           ),
                       ],

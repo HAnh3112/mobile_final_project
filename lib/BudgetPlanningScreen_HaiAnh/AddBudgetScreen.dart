@@ -1,5 +1,6 @@
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/Budget.dart';
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/TestDataBudget.dart';
+import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/Category.dart';
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/TestDataCategory.dart';
@@ -11,7 +12,7 @@ class AddBudgetScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: currentTheme.background_color,
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
@@ -22,7 +23,7 @@ class AddBudgetScreen extends StatelessWidget {
           "New Budget",
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: currentTheme.tab_bar_color,
         elevation: 2,
       ),
       body: AddBudgetScreenBody(),
@@ -59,7 +60,12 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
 
 
           //  Month picker 
-          Text("Select Month", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+          Text("Select Month", style: TextStyle(
+            fontSize: 16, 
+            fontWeight: FontWeight.w500,
+            color: currentTheme.main_text_color
+            )
+          ),
 
           const SizedBox(height: 10),
 
@@ -82,14 +88,19 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
           
 
           // Input amount
-          Text("Set Budget Amount", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+          Text("Set Budget Amount", style: TextStyle(
+            fontSize: 16, 
+            fontWeight: FontWeight.w500,
+            color: currentTheme.main_text_color
+            )
+          ),
 
           const SizedBox(height: 10),
 
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: currentTheme.sub_button_color,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.grey.shade300),
             ),
@@ -101,16 +112,17 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: '0.00',
+                hintStyle: TextStyle(color: currentTheme.sub_button_text_color),
                 suffixIcon: Padding(
                   padding: EdgeInsets.only(right: 8.0),
                   child: Text(
                     'VND',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700]),
+                    style: TextStyle(fontWeight: FontWeight.bold, color: currentTheme.main_button_text_color),
                   ),
                 ),
                 suffixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
               ),
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: currentTheme.sub_button_text_color),
             ),
           ),
 
@@ -118,24 +130,32 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
 
 
           // Category
-          Text("Select Category", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+          Text("Select Category", style: TextStyle(
+            fontSize: 16, 
+            fontWeight: FontWeight.w500,
+            color: currentTheme.main_text_color
+            )
+          ),
 
           const SizedBox(height: 10),
 
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: currentTheme.sub_button_color,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.grey.shade300),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<Category>(
                 value: selectedValue,
-                hint: Text("Choose a category"),
+                dropdownColor: currentTheme.sub_button_color,
+                hint: Text("Choose a category",style: TextStyle(color: currentTheme.sub_button_text_color),),
                 isExpanded: true,
                 items: categoryList.map((category) {
-                  return DropdownMenuItem(value: category, child: Text(category.categoryName));
+                  return DropdownMenuItem(
+                    value: category, 
+                    child: Text(category.categoryName, style: TextStyle(color: currentTheme.sub_button_text_color),));
                 }).toList(),
                 onChanged: (newVal) {
                   setState(() {
@@ -183,11 +203,11 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
                     Navigator.pop(context, true);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
+                    backgroundColor: currentTheme.main_button_color,
                     padding: EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  child: Text("CONFIRM", style: TextStyle(fontSize: 16, color: Colors.white)),
+                  child: Text("CONFIRM", style: TextStyle(fontSize: 16, color: currentTheme.main_button_text_color)),
                 ),
               ),
 
@@ -198,10 +218,10 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
                   onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 14),
-                    side: BorderSide(color: Colors.deepPurple),
+                    side: BorderSide(color: currentTheme.sub_button_text_color),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  child: Text("CANCEL", style: TextStyle(fontSize: 16, color: Colors.deepPurple)),
+                  child: Text("CANCEL", style: TextStyle(fontSize: 16, color: currentTheme.sub_button_text_color)),
                 ),
               )
             ],
