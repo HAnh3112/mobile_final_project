@@ -1,3 +1,4 @@
+import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:flutter/material.dart';
 
 // Filter data class to hold all filter selections
@@ -38,27 +39,23 @@ class TransactionFilterWidget extends StatefulWidget {
 }
 
 class _TransactionFilterWidgetState extends State<TransactionFilterWidget> {
-  // Filter state variables - these store the user's selections
-  String _selectedFilterType = 'All types';        // Income/Expense filter
-  String _selectedFilterCategory = 'All Categories'; // Category filter
-  DateTime? _startDate;                            // Date range start
-  DateTime? _endDate;                              // Date range end
-  double? _minAmount;                              // Minimum amount filter
-  double? _maxAmount;                              // Maximum amount filter
+  String _selectedFilterType = 'All types';
+  String _selectedFilterCategory = 'All Categories';
+  DateTime? _startDate;
+  DateTime? _endDate;
+  double? _minAmount;
+  double? _maxAmount;
 
-  // Text controllers for amount inputs
   final TextEditingController _minAmountController = TextEditingController();
   final TextEditingController _maxAmountController = TextEditingController();
 
   @override
   void dispose() {
-    // Clean up controllers
     _minAmountController.dispose();
     _maxAmountController.dispose();
     super.dispose();
   }
 
-  // Clear all filter selections
   void _clearAllFilters() {
     setState(() {
       _selectedFilterType = 'All types';
@@ -72,7 +69,6 @@ class _TransactionFilterWidgetState extends State<TransactionFilterWidget> {
     });
   }
 
-  // Apply filters - creates FilterData object and calls callback
   void _applyFilters() {
     final filterData = FilterData(
       selectedType: _selectedFilterType,
@@ -83,17 +79,16 @@ class _TransactionFilterWidgetState extends State<TransactionFilterWidget> {
       maxAmount: _maxAmount,
     );
 
-    // Call the callback function with filter data
     widget.onApplyFilters(filterData);
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.7, // 70% of screen height
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
+      height: MediaQuery.of(context).size.height * 0.7,
+      decoration: BoxDecoration(
+        color: currentTheme.background_color,
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
         ),
@@ -103,62 +98,59 @@ class _TransactionFilterWidgetState extends State<TransactionFilterWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with title and Clear All button
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Filter',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    color: currentTheme.main_text_color,
                   ),
                 ),
-                // Clear All button - resets all filter selections
                 TextButton(
                   onPressed: _clearAllFilters,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
+                      border: Border.all(color: currentTheme.sub_text_color.withOpacity(0.2)),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Clear All',
-                      style: TextStyle(color: Colors.black),
+                      style: TextStyle(color: currentTheme.sub_text_color),
                     ),
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: 20),
-
-            // Types (Income/Expense) and Categories row
             Row(
               children: [
-                // Types dropdown - user can select Income/Expense (UI only)
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Types', style: TextStyle(fontWeight: FontWeight.w500)),
+                      Text('Types', style: TextStyle(fontWeight: FontWeight.w500, color: currentTheme.main_text_color)),
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
+                          border: Border.all(color: currentTheme.sub_text_color.withOpacity(0.2)),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _selectedFilterType,
                             isExpanded: true,
-                            items: ['All types', 'Income', 'Expense']
-                                .map((String value) {
+                            dropdownColor: currentTheme.background_color,
+                            iconEnabledColor: currentTheme.sub_text_color,
+                            style: TextStyle(color: currentTheme.main_text_color),
+                            items: ['All types', 'Income', 'Expense'].map((String value) {
                               return DropdownMenuItem<String>(
                                 value: value,
-                                child: Text(value),
+                                child: Text(value, style: TextStyle(color: currentTheme.main_text_color)),
                               );
                             }).toList(),
                             onChanged: (String? newValue) {
@@ -173,28 +165,30 @@ class _TransactionFilterWidgetState extends State<TransactionFilterWidget> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                // Categories dropdown - user can select categories (UI only)
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Categories', style: TextStyle(fontWeight: FontWeight.w500)),
+                      Text('Categories', style: TextStyle(fontWeight: FontWeight.w500, color: currentTheme.main_text_color)),
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
+                          border: Border.all(color: currentTheme.sub_text_color.withOpacity(0.2)),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _selectedFilterCategory,
                             isExpanded: true,
+                            dropdownColor: currentTheme.background_color,
+                            iconEnabledColor: currentTheme.sub_text_color,
+                            style: TextStyle(color: currentTheme.main_text_color),
                             items: ['All Categories', 'Lunch', 'Transport', 'Salary', 'Food', 'Entertainment', 'Shopping', 'Bills']
                                 .map((String value) {
                               return DropdownMenuItem<String>(
                                 value: value,
-                                child: Text(value),
+                                child: Text(value, style: TextStyle(color: currentTheme.main_text_color)),
                               );
                             }).toList(),
                             onChanged: (String? newValue) {
@@ -210,15 +204,11 @@ class _TransactionFilterWidgetState extends State<TransactionFilterWidget> {
                 ),
               ],
             ),
-
             const SizedBox(height: 20),
-
-            // Date Range picker section (UI only - selections work but don't filter)
-            const Text('Date Range', style: TextStyle(fontWeight: FontWeight.w500)),
+            Text('Date Range', style: TextStyle(fontWeight: FontWeight.w500, color: currentTheme.main_text_color)),
             const SizedBox(height: 8),
             Row(
               children: [
-                // Start date picker
                 Expanded(
                   child: GestureDetector(
                     onTap: () async {
@@ -237,7 +227,7 @@ class _TransactionFilterWidgetState extends State<TransactionFilterWidget> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
+                        border: Border.all(color: currentTheme.sub_text_color.withOpacity(0.2)),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -245,7 +235,7 @@ class _TransactionFilterWidgetState extends State<TransactionFilterWidget> {
                             ? '${_startDate!.day}/${_startDate!.month}/${_startDate!.year}'
                             : 'Start Date',
                         style: TextStyle(
-                          color: _startDate != null ? Colors.black : Colors.grey,
+                          color: _startDate != null ? currentTheme.main_text_color : currentTheme.sub_text_color,
                         ),
                       ),
                     ),
@@ -253,9 +243,8 @@ class _TransactionFilterWidgetState extends State<TransactionFilterWidget> {
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('---'), // Separator between dates
+                  child: Text('---'),
                 ),
-                // End date picker
                 Expanded(
                   child: GestureDetector(
                     onTap: () async {
@@ -274,7 +263,7 @@ class _TransactionFilterWidgetState extends State<TransactionFilterWidget> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
+                        border: Border.all(color: currentTheme.sub_text_color.withOpacity(0.2)),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -282,7 +271,7 @@ class _TransactionFilterWidgetState extends State<TransactionFilterWidget> {
                             ? '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}'
                             : 'End Date',
                         style: TextStyle(
-                          color: _endDate != null ? Colors.black : Colors.grey,
+                          color: _endDate != null ? currentTheme.main_text_color : currentTheme.sub_text_color,
                         ),
                       ),
                     ),
@@ -290,27 +279,25 @@ class _TransactionFilterWidgetState extends State<TransactionFilterWidget> {
                 ),
               ],
             ),
-
             const SizedBox(height: 20),
-
-            // Amount Range input section (UI only - inputs work but don't filter)
-            const Text('Amount Range', style: TextStyle(fontWeight: FontWeight.w500)),
+            Text('Amount Range', style: TextStyle(fontWeight: FontWeight.w500, color: currentTheme.main_text_color)),
             const SizedBox(height: 8),
             Row(
               children: [
-                // Minimum amount input
                 Expanded(
                   child: TextField(
                     controller: _minAmountController,
+                    style: TextStyle(color: currentTheme.main_text_color),
                     decoration: InputDecoration(
                       hintText: 'Min Amount',
+                      hintStyle: TextStyle(color: currentTheme.sub_text_color),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
+                        borderSide: BorderSide(color: currentTheme.sub_text_color.withOpacity(0.2)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
+                        borderSide: BorderSide(color: currentTheme.sub_text_color.withOpacity(0.2)),
                       ),
                     ),
                     keyboardType: TextInputType.number,
@@ -320,19 +307,20 @@ class _TransactionFilterWidgetState extends State<TransactionFilterWidget> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                // Maximum amount input
                 Expanded(
                   child: TextField(
                     controller: _maxAmountController,
+                    style: TextStyle(color: currentTheme.main_text_color),
                     decoration: InputDecoration(
                       hintText: 'Max Amount',
+                      hintStyle: TextStyle(color: currentTheme.sub_text_color),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
+                        borderSide: BorderSide(color: currentTheme.sub_text_color.withOpacity(0.2)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
+                        borderSide: BorderSide(color: currentTheme.sub_text_color.withOpacity(0.2)),
                       ),
                     ),
                     keyboardType: TextInputType.number,
@@ -343,25 +331,22 @@ class _TransactionFilterWidgetState extends State<TransactionFilterWidget> {
                 ),
               ],
             ),
-
-            const Spacer(), // Push Apply button to bottom
-
-            // Apply button - collects all selections and calls callback
+            const Spacer(),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _applyFilters,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: currentTheme.main_button_color,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   'Apply',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: currentTheme.main_button_text_color,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
