@@ -45,7 +45,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.palette_outlined, color: currentTheme.sub_text_color),
+            icon: Icon((currentTheme == lightTheme)? Icons.light_mode:Icons.dark_mode, color: currentTheme.sub_text_color),
             onPressed: () {setState(() {
               if(currentTheme == lightTheme){
                 currentTheme = darkTheme;
