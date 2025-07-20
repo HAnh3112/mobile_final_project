@@ -1,16 +1,16 @@
+import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:flutter/material.dart';
 import 'transaction_filter_widget.dart'; // Import the filter widget
 
-// Transaction model class to represent each transaction
 class Transaction {
   final String id;
-  final String type;        // Category like Food, Transport, Salary
-  final String category;    // Subcategory like Lunch, Transport, Salary
-  final double amount;      // Transaction amount
-  final DateTime date;      // Transaction date
-  final IconData icon;      // Icon to display
-  final Color iconColor;    // Icon background color
-  final bool isIncome;      // true = Income, false = Expense
+  final String type;
+  final String category;
+  final double amount;
+  final DateTime date;
+  final IconData icon;
+  final Color iconColor;
+  final bool isIncome;
 
   Transaction({
     required this.id,
@@ -32,10 +32,8 @@ class TransactionHistoryScreen extends StatefulWidget {
 }
 
 class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
-  // Search controller for the search bar
   final TextEditingController _searchController = TextEditingController();
 
-  // Sample transaction data - replace with real data from database
   final List<Transaction> _allTransactions = [
     Transaction(
       id: '1',
@@ -45,7 +43,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       date: DateTime(2024, 1, 15),
       icon: Icons.restaurant,
       iconColor: Colors.red,
-      isIncome: false, // This is an expense
+      isIncome: false,
     ),
     Transaction(
       id: '2',
@@ -55,7 +53,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       date: DateTime(2024, 1, 14),
       icon: Icons.directions_car,
       iconColor: Colors.teal,
-      isIncome: false, // This is an expense
+      isIncome: false,
     ),
     Transaction(
       id: '3',
@@ -65,44 +63,36 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       date: DateTime(2024, 1, 1),
       icon: Icons.attach_money,
       iconColor: Colors.purple,
-      isIncome: true, // This is income
+      isIncome: true,
     ),
   ];
 
-  // Working copy of transactions (can be modified by delete operations)
   List<Transaction> transactions = [];
 
   @override
   void initState() {
     super.initState();
-    // Initialize transactions with sample data
     transactions = List.from(_allTransactions);
-
-    // Listen to search text changes for real-time filtering
     _searchController.addListener(() {
-      setState(() {}); // Rebuild UI when search text changes
+      setState(() {});
     });
   }
 
   @override
   void dispose() {
-    // Clean up the controller when widget is disposed
     _searchController.dispose();
     super.dispose();
   }
 
-  // Show the filter modal using the separate filter widget
   void _showFilterModal() {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Allow full height control
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return TransactionFilterWidget(
           onApplyFilters: (filterData) {
-            // Handle filter application here
-            // For now, we just close the modal without applying filters
-            print('Filter applied: $filterData'); // Debug print
+            print('Filter applied: $filterData');
             Navigator.pop(context);
           },
         );
@@ -110,74 +100,65 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     );
   }
 
-  // Return all transactions without filtering (filter functionality removed)
-  List<Transaction> get displayedTransactions {
-    // NOTE: Filter functionality has been removed
-    // This now just returns all transactions regardless of filter selections
-    return transactions;
-
-    // REMOVED: All filtering logic has been commented out
-    // The search and filter selections still work in the UI but don't affect the data
-  }
+  List<Transaction> get displayedTransactions => transactions;
 
   @override
   Widget build(BuildContext context) {
+    final theme = currentTheme;
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      // App bar with back button and filter icon
+      backgroundColor: theme.background_color,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, color: theme.main_text_color),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
+        title: Text(
           'Transaction History',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
+            color: theme.main_text_color,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: theme.background_color,
         elevation: 0,
         actions: [
-          // Filter icon button - opens filter modal
           IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () => _showFilterModal(),
+            icon: Icon(Icons.filter_list, color: theme.main_text_color),
+            onPressed: _showFilterModal,
           ),
         ],
       ),
       body: Column(
         children: [
-          // Search bar section (UI only - doesn't filter data)
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: _searchController,
+              style: TextStyle(color: theme.main_text_color),
               decoration: InputDecoration(
                 hintText: 'Search transactions...',
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                hintStyle: TextStyle(color: theme.sub_text_color),
+                prefixIcon: Icon(Icons.search, color: theme.sub_text_color),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderSide: BorderSide(color: theme.sub_text_color.withOpacity(0.3)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderSide: BorderSide(color: theme.sub_text_color.withOpacity(0.3)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.blue),
+                  borderSide: BorderSide(color: theme.main_button_color),
                 ),
                 filled: true,
-                fillColor: Colors.grey.shade50,
+                fillColor: theme.sub_button_color,
               ),
             ),
           ),
-
           const SizedBox(height: 20),
-
-          // Transaction list section - shows all transactions
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -189,17 +170,16 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Date header for each group
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Row(
                         children: [
-                          const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
+                          Icon(Icons.calendar_today, size: 16, color: theme.main_text_color),
                           const SizedBox(width: 8),
                           Text(
                             dateKey,
                             style: TextStyle(
-                              color: Colors.grey.shade600,
+                              color: theme.main_text_color,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
@@ -207,19 +187,16 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                         ],
                       ),
                     ),
-
-                    // List of transactions for this date
                     ...dayTransactions.map((transaction) => Container(
                       margin: const EdgeInsets.only(bottom: 12),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: theme.sub_button_color,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
+                        border: Border.all(color: theme.sub_text_color.withOpacity(0.1)),
                       ),
                       child: Row(
                         children: [
-                          // Transaction icon with colored background
                           Container(
                             width: 48,
                             height: 48,
@@ -233,59 +210,52 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                               size: 24,
                             ),
                           ),
-
                           const SizedBox(width: 16),
-
-                          // Transaction details (type and category)
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  transaction.type, // Main category
-                                  style: const TextStyle(
+                                  transaction.type,
+                                  style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
+                                    color: theme.main_text_color,
                                   ),
                                 ),
                                 Text(
-                                  transaction.category, // Subcategory
+                                  transaction.category,
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: Colors.grey.shade600,
+                                    color: theme.sub_text_color,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-
-                          // Amount with + or - prefix and color coding
                           Text(
                             '${transaction.isIncome ? '+' : '-'}\$${transaction.amount.toStringAsFixed(transaction.amount == transaction.amount.toInt() ? 0 : 1)}',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: transaction.isIncome ? Colors.green : Colors.red, // Green for income, red for expense
+                              color: transaction.isIncome ? Colors.green : Colors.red,
                             ),
                           ),
-
                           const SizedBox(width: 12),
-
-                          // Delete button - DISABLED (for display only)
                           IconButton(
-                            icon: const Icon(Icons.delete_outline, color: Colors.grey), // Grey to show it's disabled
+                            icon: Icon(Icons.delete_outline, color: theme.sub_text_color),
                             onPressed: () {
-                              // Show message that delete is disabled
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
-                                    title: const Text('Delete Disabled'),
-                                    content: const Text('Delete functionality is currently disabled.'),
+                                    title: Text('Delete Disabled', style: TextStyle(color: theme.main_text_color)),
+                                    content: Text('Delete functionality is currently disabled.', style: TextStyle(color: theme.sub_text_color)),
+                                    backgroundColor: theme.background_color,
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.of(context).pop(),
-                                        child: const Text('OK'),
+                                        child: Text('OK', style: TextStyle(color: theme.main_button_color)),
                                       ),
                                     ],
                                   );
@@ -306,11 +276,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     );
   }
 
-  // Group transactions by date for display (no filtering applied)
   Map<String, List<Transaction>> get groupedTransactions {
     Map<String, List<Transaction>> grouped = {};
-
-    // Group all transactions by date string (no filtering)
     for (var transaction in displayedTransactions) {
       String dateKey = '${transaction.date.month}/${transaction.date.day}/${transaction.date.year}';
       if (!grouped.containsKey(dateKey)) {
