@@ -1,3 +1,4 @@
+import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
@@ -28,8 +29,7 @@ class CategoryManagementScreen extends StatefulWidget {
   const CategoryManagementScreen({super.key});
 
   @override
-  State<CategoryManagementScreen> createState() =>
-      _CategoryManagementScreenState();
+  State<CategoryManagementScreen> createState() => _CategoryManagementScreenState();
 }
 
 class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
@@ -40,32 +40,17 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
   Color _selectedColor = const Color(0xFFFF6B6B);
 
   final List<String> commonIcons = [
-    '🍔',
-    '🚗',
-    '🛍️',
-    '💡',
-    '🎬',
-    '💰',
-    '🏠',
-    '📱',
-    '⚕️',
-    '🎓',
-    '✈️',
-    '🎮',
+    '🍔', '🚗', '🛍️', '💡', '🎬', '💰', '🏠', '📱', '⚕️', '🎓', '✈️', '🎮',
   ];
 
   final List<Color> commonColors = [
-    Color(0xFFFF6B6B),
-    Color(0xFF4ECDC4),
-    Color(0xFF45B7D1),
-    Color(0xFF96CEB4),
-    Color(0xFFFFEAA7),
-    Color(0xFFDDA0DD),
-    Color(0xFFFFB6C1),
-    Color(0xFF98D8C8),
+    Color(0xFFFF6B6B), Color(0xFF4ECDC4), Color(0xFF45B7D1), Color(0xFF96CEB4),
+    Color(0xFFFFEAA7), Color(0xFFDDA0DD), Color(0xFFFFB6C1), Color(0xFF98D8C8),
   ];
 
   void _showCategoryDialog({Category? existing}) {
+    final theme = currentTheme;
+
     _nameController.text = existing?.name ?? '';
     _selectedIcon = existing?.icon;
     _selectedColor = existing?.color ?? const Color(0xFFFF6B6B);
@@ -74,29 +59,40 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setStateDialog) => AlertDialog(
-          title: Text(existing == null ? "Add New Category" : "Edit Category"),
+          backgroundColor: Colors.grey[100],
+          title: Text(
+            existing == null ? "Add New Category" : "Edit Category",
+            style: TextStyle(color: Colors.black),
+          ),
           content: SingleChildScrollView(
             child: Column(
               children: [
                 TextField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: "Category Name"),
+                  style: TextStyle(color: Colors.black),
+                  decoration: InputDecoration(
+                    labelText: "Category Name",
+                    labelStyle: TextStyle(color: Colors.black),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black.withOpacity(0.3)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: theme.main_button_color),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 12),
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
-                  child: Text("Choose Icon"),
+                  child: Text("Choose Icon", style: TextStyle(color: Colors.black)),
                 ),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: commonIcons.map((icon) {
                     final isSelected = _selectedIcon == icon;
-
                     final isUsedByOther = _categories.any(
-                      (cat) =>
-                          cat.icon == icon &&
-                          (existing == null || cat.id != existing.id),
+                      (cat) => cat.icon == icon && (existing == null || cat.id != existing.id),
                     );
                     final isDisabled = isUsedByOther;
 
@@ -106,34 +102,27 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                         ChoiceChip(
                           label: Text(
                             icon,
-                            style: const TextStyle(fontSize: 20),
+                            style: TextStyle(fontSize: 20, color: theme.main_text_color),
                           ),
                           selected: isSelected,
-                          onSelected: isDisabled
-                              ? null
-                              : (_) =>
-                                    setStateDialog(() => _selectedIcon = icon),
-                          selectedColor: Colors.blue.shade100,
-                          disabledColor: Colors.grey.shade200,
+                          onSelected: isDisabled ? null : (_) => setStateDialog(() => _selectedIcon = icon),
+                          selectedColor: theme.main_button_color,
+                          disabledColor: theme.background_color,
                         ),
                         if (isSelected)
-                          const Positioned(
+                          Positioned(
                             top: -4,
                             right: -4,
-                            child: Icon(
-                              Icons.close,
-                              size: 16,
-                              color: Colors.black,
-                            ),
+                            child: Icon(Icons.close, size: 16, color: theme.main_text_color),
                           ),
                       ],
                     );
                   }).toList(),
                 ),
                 const SizedBox(height: 12),
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
-                  child: Text("Choose Color"),
+                  child: Text("Choose Color", style: TextStyle(color: Colors.black)),
                 ),
                 Wrap(
                   spacing: 8,
@@ -148,9 +137,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                           color: color,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: _selectedColor == color
-                                ? Colors.black
-                                : Colors.transparent,
+                            color: _selectedColor == color ? Colors.black : Colors.transparent,
                             width: 2,
                           ),
                         ),
@@ -164,29 +151,29 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
+              child: Text("Cancel", style: TextStyle(color: theme.main_button_color)),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.main_button_color,
+              ),
               onPressed: () {
                 final name = _nameController.text.trim();
                 if (name.isEmpty || _selectedIcon == null) return;
 
                 final nameExists = _categories.any(
-                  (cat) =>
-                      cat.name.toLowerCase() == name.toLowerCase() &&
-                      (existing == null || cat.id != existing.id),
+                  (cat) => cat.name.toLowerCase() == name.toLowerCase() && (existing == null || cat.id != existing.id),
                 );
 
                 final iconExists = _categories.any(
-                  (cat) =>
-                      cat.icon == _selectedIcon &&
-                      (existing == null || cat.id != existing.id),
+                  (cat) => cat.icon == _selectedIcon && (existing == null || cat.id != existing.id),
                 );
 
                 if (nameExists || iconExists) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Name or icon already exists'),
+                    SnackBar(
+                      content: Text('Name or icon already exists', style: TextStyle(color: theme.main_text_color)),
+                      backgroundColor: theme.background_color,
                     ),
                   );
                   return;
@@ -199,9 +186,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                     color: _selectedColor,
                   );
                   setState(() {
-                    final index = _categories.indexWhere(
-                      (c) => c.id == existing.id,
-                    );
+                    final index = _categories.indexWhere((c) => c.id == existing.id);
                     _categories[index] = updated;
                   });
                 } else {
@@ -216,7 +201,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
 
                 Navigator.pop(context);
               },
-              child: Text(existing == null ? "Add" : "Save"),
+              child: Text(existing == null ? "Add" : "Save", style: TextStyle(color: theme.main_button_text_color)),
             ),
           ],
         ),
@@ -230,13 +215,17 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = currentTheme;
+
     return Scaffold(
+      backgroundColor: theme.background_color,
       appBar: AppBar(
-        leading: const BackButton(),
-        title: const Text("Categories"),
+        backgroundColor: theme.background_color,
+        leading: BackButton(color: theme.main_text_color),
+        title: Text("Categories", style: TextStyle(color: theme.main_text_color)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: Icon(Icons.add, color: theme.main_text_color),
             onPressed: () => _showCategoryDialog(),
           ),
         ],
@@ -246,17 +235,15 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text("📂", style: TextStyle(fontSize: 48)),
-                  const Text(
-                    "No Categories Yet",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const Text("Add your first category to get started"),
+                  Text("📂", style: TextStyle(fontSize: 48)),
+                  Text("No Categories Yet", style: TextStyle(fontWeight: FontWeight.bold, color: theme.main_text_color)),
+                  Text("Add your first category to get started", style: TextStyle(color: theme.sub_text_color)),
                   const SizedBox(height: 12),
                   ElevatedButton.icon(
                     onPressed: () => _showCategoryDialog(),
-                    icon: const Icon(Icons.add),
-                    label: const Text("Add Category"),
+                    icon: Icon(Icons.add, color: theme.main_button_text_color),
+                    label: Text("Add Category", style: TextStyle(color: theme.main_button_text_color)),
+                    style: ElevatedButton.styleFrom(backgroundColor: theme.main_button_color),
                   ),
                 ],
               ),
@@ -266,27 +253,24 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
               itemBuilder: (context, index) {
                 final category = _categories[index];
                 return Card(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
+                  color: theme.sub_button_color,
+                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: category.color,
                       child: Text(category.icon),
                     ),
-                    title: Text(category.name),
-                    subtitle: const Text("Category"),
+                    title: Text(category.name, style: TextStyle(color: theme.main_text_color)),
+                    subtitle: Text("Category", style: TextStyle(color: theme.sub_text_color)),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () =>
-                              _showCategoryDialog(existing: category),
+                          icon: Icon(Icons.edit, color: theme.main_button_color),
+                          onPressed: () => _showCategoryDialog(existing: category),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
+                          icon: Icon(Icons.delete, color: theme.main_button_color.withOpacity(0.7)),
                           onPressed: () => _deleteCategory(category.id),
                         ),
                       ],
