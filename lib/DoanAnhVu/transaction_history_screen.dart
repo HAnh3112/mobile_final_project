@@ -1,6 +1,6 @@
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:flutter/material.dart';
-import 'transaction_filter_widget.dart'; // Import the filter widget
+import 'package:final_project/QuynhAnh_screens/add_transaction_screen.dart';
 
 class Transaction {
   final String id;
@@ -28,13 +28,14 @@ class TransactionHistoryScreen extends StatefulWidget {
   const TransactionHistoryScreen({super.key});
 
   @override
-  State<TransactionHistoryScreen> createState() => _TransactionHistoryScreenState();
+  State<TransactionHistoryScreen> createState() =>
+      _TransactionHistoryScreenState();
 }
 
 class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   final TextEditingController _searchController = TextEditingController();
 
-  final List<Transaction> _allTransactions = [
+  final List<Transaction> transactions = [
     Transaction(
       id: '1',
       type: 'Food',
@@ -67,12 +68,9 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     ),
   ];
 
-  List<Transaction> transactions = [];
-
   @override
   void initState() {
     super.initState();
-    transactions = List.from(_allTransactions);
     _searchController.addListener(() {
       setState(() {});
     });
@@ -84,23 +82,18 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     super.dispose();
   }
 
-  void _showFilterModal() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return TransactionFilterWidget(
-          onApplyFilters: (filterData) {
-            print('Filter applied: $filterData');
-            Navigator.pop(context);
-          },
-        );
-      },
-    );
+  Map<String, List<Transaction>> get groupedTransactions {
+    Map<String, List<Transaction>> grouped = {};
+    for (var transaction in transactions) {
+      String dateKey =
+          '${transaction.date.month}/${transaction.date.day}/${transaction.date.year}';
+      if (!grouped.containsKey(dateKey)) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey]!.add(transaction);
+    }
+    return grouped;
   }
-
-  List<Transaction> get displayedTransactions => transactions;
 
   @override
   Widget build(BuildContext context) {
@@ -123,12 +116,22 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
         ),
         backgroundColor: theme.background_color,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.filter_list, color: theme.main_text_color),
-            onPressed: _showFilterModal,
-          ),
-        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: theme.main_button_color,
+        child: const Icon(Icons.add),
+        onPressed: () async {
+          final newTransaction = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
+          );
+
+          if (newTransaction != null && newTransaction is Transaction) {
+            setState(() {
+              transactions.add(newTransaction);
+            });
+          }
+        },
       ),
       body: Column(
         children: [
@@ -143,11 +146,15 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                 prefixIcon: Icon(Icons.search, color: theme.sub_text_color),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: theme.sub_text_color.withOpacity(0.3)),
+                  borderSide: BorderSide(
+                    color: theme.sub_text_color.withOpacity(0.3),
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: theme.sub_text_color.withOpacity(0.3)),
+                  borderSide: BorderSide(
+                    color: theme.sub_text_color.withOpacity(0.3),
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -165,7 +172,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               itemCount: groupedTransactions.keys.length,
               itemBuilder: (context, index) {
                 String dateKey = groupedTransactions.keys.elementAt(index);
-                List<Transaction> dayTransactions = groupedTransactions[dateKey]!;
+                List<Transaction> dayTransactions =
+                    groupedTransactions[dateKey]!;
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,7 +182,11 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Row(
                         children: [
-                          Icon(Icons.calendar_today, size: 16, color: theme.main_text_color),
+                          Icon(
+                            Icons.calendar_today,
+                            size: 16,
+                            color: theme.main_text_color,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             dateKey,
@@ -187,85 +199,69 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                         ],
                       ),
                     ),
-                    ...dayTransactions.map((transaction) => Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: theme.sub_button_color,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: theme.sub_text_color.withOpacity(0.1)),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: transaction.iconColor.withOpacity(0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              transaction.icon,
-                              color: transaction.iconColor,
-                              size: 24,
-                            ),
+                    ...dayTransactions.map(
+                      (transaction) => Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: theme.sub_button_color,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: theme.sub_text_color.withOpacity(0.1),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  transaction.type,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: theme.main_text_color,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: transaction.iconColor.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                transaction.icon,
+                                color: transaction.iconColor,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    transaction.type,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: theme.main_text_color,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  transaction.category,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: theme.sub_text_color,
+                                  Text(
+                                    transaction.category,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: theme.sub_text_color,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          Text(
-                            '${transaction.isIncome ? '+' : '-'}\$${transaction.amount.toStringAsFixed(transaction.amount == transaction.amount.toInt() ? 0 : 1)}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: transaction.isIncome ? Colors.green : Colors.red,
+                            Text(
+                              '${transaction.isIncome ? '+' : '-'}\$${transaction.amount.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: transaction.isIncome
+                                    ? Colors.green
+                                    : Colors.red,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          IconButton(
-                            icon: Icon(Icons.delete_outline, color: theme.sub_text_color),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text('Delete Disabled', style: TextStyle(color: theme.main_text_color)),
-                                    content: Text('Delete functionality is currently disabled.', style: TextStyle(color: theme.sub_text_color)),
-                                    backgroundColor: theme.background_color,
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.of(context).pop(),
-                                        child: Text('OK', style: TextStyle(color: theme.main_button_color)),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    )).toList(),
+                    ),
                   ],
                 );
               },
@@ -274,17 +270,5 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
         ],
       ),
     );
-  }
-
-  Map<String, List<Transaction>> get groupedTransactions {
-    Map<String, List<Transaction>> grouped = {};
-    for (var transaction in displayedTransactions) {
-      String dateKey = '${transaction.date.month}/${transaction.date.day}/${transaction.date.year}';
-      if (!grouped.containsKey(dateKey)) {
-        grouped[dateKey] = [];
-      }
-      grouped[dateKey]!.add(transaction);
-    }
-    return grouped;
   }
 }
