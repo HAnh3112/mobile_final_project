@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 
 class ExpenseBreakdownScreen extends StatelessWidget {
   const ExpenseBreakdownScreen({super.key});
@@ -17,16 +18,17 @@ class ExpenseBreakdownScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: currentTheme.background_color,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: currentTheme.background_color,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: currentTheme.main_text_color),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           "Expense Breakdown",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(color: currentTheme.main_text_color, fontWeight: FontWeight.bold),
         ),
       ),
       body: SingleChildScrollView(
@@ -70,7 +72,7 @@ class ExpenseBreakdownScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: currentTheme.elevated_background_color,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -83,9 +85,9 @@ class ExpenseBreakdownScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "Expense by category",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: currentTheme.main_button_text_color),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -123,10 +125,10 @@ class ExpenseBreakdownScreen extends StatelessWidget {
                       children: [
                         Icon(Icons.circle, size: 12, color: item["color"]),
                         const SizedBox(width: 8),
-                        Text(item["category"]),
+                        Text(item["category"], style: TextStyle(color: currentTheme.main_text_color),),
                       ],
                     ),
-                    Text("${item["amount"].toStringAsFixed(0)}\$"),
+                    Text("${item["amount"].toStringAsFixed(0)}\$", style: TextStyle(color: currentTheme.main_text_color)),
                   ],
                 ),
               );
@@ -157,7 +159,7 @@ class ExpenseBreakdownScreen extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       width: 150,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: currentTheme.sub_button_color,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -173,7 +175,7 @@ class ExpenseBreakdownScreen extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             title,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: currentTheme.sub_button_text_color),
           ),
           const SizedBox(height: 4),
           Text(
@@ -192,11 +194,11 @@ class ExpenseBreakdownScreen extends StatelessWidget {
   Widget _buildExportButton(IconData icon, String text) {
     return ElevatedButton.icon(
       onPressed: () {},
-      icon: Icon(icon, size: 20),
-      label: Text(text),
+      icon: Icon(icon, size: 20, color: currentTheme.main_button_text_color,),
+      label: Text(text, style: TextStyle(color: currentTheme.main_button_text_color),),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        backgroundColor: Colors.blue,
+        backgroundColor: currentTheme.main_button_color,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );

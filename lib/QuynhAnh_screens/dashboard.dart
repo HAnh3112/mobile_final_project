@@ -127,13 +127,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       color: currentTheme.sub_button_color,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       itemBuilder: (BuildContext context) => [
-        const PopupMenuItem(
+        PopupMenuItem(
           value: 'signout',
           child: Row(
             children: [
               Icon(Icons.logout, color: Colors.red),
               SizedBox(width: 8),
-              Text("Sign Out"),
+              Text("Sign Out", style: TextStyle(color: currentTheme.main_text_color),),
             ],
           ),
         ),
@@ -350,7 +350,7 @@ class _DashboardContent extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => TransactionHistoryScreen(),
+                      builder: (context) => TransactionHistoryScreen(showAppBar: true,),
                     ),
                   );
                 },

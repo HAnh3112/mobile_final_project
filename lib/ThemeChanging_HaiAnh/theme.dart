@@ -47,7 +47,7 @@ theme lightTheme = theme(
 );
 
 theme darkTheme = theme(
-  background_color: Colors.black, 
+  background_color: Colors.grey[900]!, 
   elevated_background_color: 
     LinearGradient(
       colors: [
