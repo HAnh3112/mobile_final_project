@@ -4,7 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:final_project/DoanAnhVu/transaction_history_screen.dart'; // Import Transaction model
 
 class AddTransactionScreen extends StatefulWidget {
-  const AddTransactionScreen({super.key});
+  final bool? showTabbar;
+  AddTransactionScreen({this.showTabbar});
 
   @override
   State<AddTransactionScreen> createState() => _AddTransactionScreenState();
@@ -54,6 +55,20 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: currentTheme.background_color,
+      appBar: (widget.showTabbar == true)? AppBar(
+        backgroundColor: currentTheme.tab_bar_color,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: currentTheme.main_button_text_color,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          'Add Transaction',
+          style: TextStyle(color: currentTheme.main_button_text_color),
+        ),
+      ):null,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(

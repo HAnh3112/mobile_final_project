@@ -1,3 +1,4 @@
+import 'package:final_project/DoanAnhVu/transaction_filter_widget.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/theme.dart';
 import 'package:flutter/material.dart';
@@ -125,6 +126,24 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     );
   }
 
+  void _showFilterModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allow full height control
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return TransactionFilterWidget(
+          onApplyFilters: (filterData) {
+            // Handle filter application here
+            // For now, we just close the modal without applying filters
+            print('Filter applied: $filterData'); // Debug print
+            Navigator.pop(context);
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = currentTheme;
@@ -168,11 +187,11 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       ): null,
       floatingActionButton: FloatingActionButton(
         backgroundColor: theme.main_button_color,
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add,color: currentTheme.main_text_color,),
         onPressed: () async {
           final newTransaction = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
+            MaterialPageRoute(builder: (_) => AddTransactionScreen(showTabbar: true,)),
           );
 
           if (newTransaction != null && newTransaction is Transaction) {
@@ -214,7 +233,16 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 5),
+          Container(
+            alignment: AlignmentDirectional.topEnd,
+            child: TextButton.icon(
+              onPressed: () => _showFilterModal(),
+              icon: Icon(Icons.filter_list, size: 18,),
+              label: Text("Filter",style: TextStyle(fontSize: 18),),
+            ),
+          ),
+          const SizedBox(height: 5,),
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
