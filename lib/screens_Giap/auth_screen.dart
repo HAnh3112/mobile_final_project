@@ -12,8 +12,16 @@ class _AuthScreenState extends State<AuthScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _showPassword = false;
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+
+  final _loginFormKey = GlobalKey<FormState>();
+  final _signupFormKey = GlobalKey<FormState>();
+
+  final _loginEmailController = TextEditingController();
+  final _loginPasswordController = TextEditingController();
+
+  final _signupEmailController = TextEditingController();
+  final _signupPasswordController = TextEditingController();
+  final _signupConfirmPasswordController = TextEditingController();
 
   @override
   void initState() {
@@ -24,8 +32,11 @@ class _AuthScreenState extends State<AuthScreen>
   @override
   void dispose() {
     _tabController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
+    _loginEmailController.dispose();
+    _loginPasswordController.dispose();
+    _signupEmailController.dispose();
+    _signupPasswordController.dispose();
+    _signupConfirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -117,65 +128,99 @@ class _AuthScreenState extends State<AuthScreen>
   }
 
   Widget buildLoginTab() {
-    return Column(
-      children: [
-        buildEmailInput(),
-        const SizedBox(height: 16),
-        buildPasswordInput(),
-        const SizedBox(height: 24),
-        ElevatedButton(
-          onPressed: () {
-            //Need check if password is correct or not, if correct:
-            Navigator.push(context, 
-            MaterialPageRoute(builder: (context) => DashboardScreen()));
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue[600],
-            minimumSize: const Size.fromHeight(48),
+    return Form(
+      key: _loginFormKey,
+      child: Column(
+        children: [
+          buildEmailInput(controller: _loginEmailController),
+          const SizedBox(height: 16),
+          buildPasswordInput(controller: _loginPasswordController),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () {
+              if (_loginFormKey.currentState!.validate()) {
+                // Nếu hợp lệ
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DashboardScreen()),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue[600],
+              minimumSize: const Size.fromHeight(48),
+            ),
+            child: const Text(
+              "Sign In",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
-          child: const Text(
-            "Sign In",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-        ),
-        TextButton(
-          onPressed: () {},
-          child: const Text(
-            "Forgot password?",
-            style: TextStyle(color: Colors.blue),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget buildSignUpTab() {
-    return Column(
-      children: [
-        buildEmailInput(),
-        const SizedBox(height: 16),
-        buildPasswordInput(label: "Password"),
-        const SizedBox(height: 16),
-        buildPasswordInput(label: "Confirm Password"),
-        const SizedBox(height: 24),
-        ElevatedButton(
-          onPressed: () {},
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue[600],
-            minimumSize: const Size.fromHeight(48),
+    return Form(
+      key: _signupFormKey,
+      child: Column(
+        children: [
+          buildEmailInput(controller: _signupEmailController),
+          const SizedBox(height: 16),
+          buildPasswordInput(
+            controller: _signupPasswordController,
+            label: "Password",
           ),
-          child: const Text(
-            "Create Account",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          const SizedBox(height: 16),
+          buildPasswordInput(
+            controller: _signupConfirmPasswordController,
+            label: "Confirm Password",
+            validator: (value) {
+              if (value == null || value.isEmpty)
+                return 'Please confirm your password';
+              if (value != _signupPasswordController.text)
+                return 'Passwords do not match';
+              return null;
+            },
           ),
-        ),
-      ],
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () {
+              if (_signupFormKey.currentState!.validate()) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Account created!")),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue[600],
+              minimumSize: const Size.fromHeight(48),
+            ),
+            child: const Text(
+              "Create Account",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget buildEmailInput() {
+  Widget buildEmailInput({required TextEditingController controller}) {
     return TextFormField(
-      controller: _emailController,
+      controller: controller,
+      validator: (value) {
+        if (value == null || value.isEmpty) return 'Email is required';
+        if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value))
+          return 'Enter a valid email';
+        return null;
+      },
       decoration: InputDecoration(
         labelText: "Email",
         prefixIcon: const Icon(Icons.mail),
@@ -184,18 +229,28 @@ class _AuthScreenState extends State<AuthScreen>
     );
   }
 
-  Widget buildPasswordInput({String label = "Password"}) {
+  Widget buildPasswordInput({
+    required TextEditingController controller,
+    String label = "Password",
+    String? Function(String?)? validator,
+  }) {
     return TextFormField(
-      controller: _passwordController,
+      controller: controller,
       obscureText: !_showPassword,
+      validator:
+          validator ??
+          (value) {
+            if (value == null || value.isEmpty) return 'Password is required';
+            if (value.length < 6)
+              return 'Password must be at least 6 characters';
+            return null;
+          },
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: const Icon(Icons.lock),
         suffixIcon: IconButton(
           icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
-          onPressed: () {
-            setState(() => _showPassword = !_showPassword);
-          },
+          onPressed: () => setState(() => _showPassword = !_showPassword),
         ),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
       ),
