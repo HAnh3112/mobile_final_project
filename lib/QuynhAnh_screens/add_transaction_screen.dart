@@ -54,20 +54,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: currentTheme.background_color,
-      appBar: AppBar(
-        backgroundColor: currentTheme.tab_bar_color,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: currentTheme.main_button_text_color,
-          ),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          'Add Transaction',
-          style: TextStyle(color: currentTheme.main_button_text_color),
-        ),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(

@@ -17,10 +17,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0; // To keep track of the selected tab
 
   // List of screens to navigate to
-  static final List<Widget> _widgetOptions = <Widget>[
-    _DashboardContent(), // Your current dashboard content
+  List<Widget> _widgetOptions() => [
+    _DashboardContent(),
     TransactionHistoryScreen(),
-    AddTransactionScreen(), // Changed order for "Add" to be in the middle of 5 items
+    AddTransactionScreen(),
     BudgetPlanning(),
     CategoryManagementScreen(),
   ];
@@ -31,15 +31,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
+  String titleName(index){
+    switch(index){
+      case 0: return "Dashboard";
+      case 1: return "Transaction History";
+      case 2: return "Add Transaction";
+      case 3: return "Budget Planning";
+      case 4: return "Categories";
+      default: return "Unknown";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: currentTheme.background_color,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: currentTheme.background_color,
         elevation: 0,
         title: Text(
-          'Dashboard',
+          titleName(_selectedIndex),
           style: TextStyle(
             color: currentTheme.main_text_color,
             fontSize: 26,
@@ -65,9 +77,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(width: 8),
         ],
       ),
-      body: _widgetOptions.elementAt(
-        _selectedIndex,
-      ), // Use _widgetOptions for all screens
+      body: _widgetOptions()[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: currentTheme.background_color,
         selectedItemColor: currentTheme.main_button_color,

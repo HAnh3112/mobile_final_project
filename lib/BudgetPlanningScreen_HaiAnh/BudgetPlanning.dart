@@ -12,21 +12,6 @@ class BudgetPlanning extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: currentTheme.background_color,
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context); //Navigate back to dashboard
-          },
-
-          icon: Icon(Icons.arrow_back),
-          color: Colors.white,
-        ),
-        title: Text(
-          "Budget Planning",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        backgroundColor: currentTheme.tab_bar_color,
-      ),
       body: BudgetPlanningBody(),
     );
   }
@@ -94,7 +79,7 @@ class BudgetPlanningBody extends StatefulWidget {
 class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
   int? editingIndex;
   TextEditingController editingController = TextEditingController();
-  List<Budget>? allBudgets = mockBudgetBlank;
+  List<Budget>? allBudgets = mockBudgetsJuly;
 
   DateFormat dateFormat = DateFormat("MM/yyyy");
   DateTime currentDate = DateTime.now();

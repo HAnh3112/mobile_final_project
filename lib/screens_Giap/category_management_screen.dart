@@ -219,17 +219,6 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
 
     return Scaffold(
       backgroundColor: theme.background_color,
-      appBar: AppBar(
-        backgroundColor: theme.background_color,
-        leading: BackButton(color: theme.main_text_color),
-        title: Text("Categories", style: TextStyle(color: theme.main_text_color)),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add, color: theme.main_text_color),
-            onPressed: () => _showCategoryDialog(),
-          ),
-        ],
-      ),
       body: _categories.isEmpty
           ? Center(
               child: Column(

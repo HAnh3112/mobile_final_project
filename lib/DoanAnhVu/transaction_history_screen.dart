@@ -101,22 +101,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
 
     return Scaffold(
       backgroundColor: theme.background_color,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: theme.main_text_color),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          'Transaction History',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: theme.main_text_color,
-          ),
-        ),
-        backgroundColor: theme.background_color,
-        elevation: 0,
-      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: theme.main_button_color,
         child: const Icon(Icons.add),
