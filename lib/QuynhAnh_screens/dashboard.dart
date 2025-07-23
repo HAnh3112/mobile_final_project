@@ -14,6 +14,23 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  int _selectedIndex = 0; // To keep track of the selected tab
+
+  // List of screens to navigate to
+  static final List<Widget> _widgetOptions = <Widget>[
+    _DashboardContent(), // Your current dashboard content
+    TransactionHistoryScreen(),
+    AddTransactionScreen(), // Changed order for "Add" to be in the middle of 5 items
+    BudgetPlanning(),
+    CategoryManagementScreen(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,21 +65,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(width: 8),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(18.0),
-        child: Column(
-          children: [
-            _buildBalanceCard(),
-            const SizedBox(height: 20),
-            _buildExpenseOverviewCard(),
-            const SizedBox(height: 15),
-            _buildRecentTransactions(), // THÊM MỚI
-            const SizedBox(height: 15),
-            _buildMonthlySummaryRow(),
-            const SizedBox(height: 20),
-            _buildFeatureRow(context),
-          ],
-        ),
+      body: _widgetOptions.elementAt(
+        _selectedIndex,
+      ), // Use _widgetOptions for all screens
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: currentTheme.background_color,
+        selectedItemColor: currentTheme.main_button_color,
+        unselectedItemColor: currentTheme.sub_text_color,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed, // Ensures all labels are shown
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: currentTheme.main_button_color,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.add, color: Colors.white, size: 30),
+            ),
+            label: 'Add',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.pie_chart_outline),
+            label: 'Budget',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.category_outlined),
+            label: 'Category',
+          ),
+        ],
       ),
     );
   }
@@ -73,7 +108,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       icon: Icon(Icons.settings, color: currentTheme.sub_text_color, size: 28),
       onSelected: (value) {
         if (value == 'signout') {
-          Navigator.pop(context);
+          // You might want to navigate to a login screen or perform actual sign-out logic here
+          Navigator.pop(
+            context,
+          ); // This will pop the current route (DashboardScreen)
         }
       },
       color: currentTheme.sub_button_color,
@@ -90,6 +128,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+// Extract your original dashboard body into a separate widget
+class _DashboardContent extends StatelessWidget {
+  const _DashboardContent({Key? key})
+    : super(key: key); // Add a constructor for best practice
+
+  @override
+  Widget build(BuildContext context) {
+    // context is available here
+    return Padding(
+      padding: const EdgeInsets.all(18.0),
+      child: Column(
+        children: [
+          _buildBalanceCard(),
+          const SizedBox(height: 20),
+          _buildExpenseOverviewCard(context), // Pass context here
+          const SizedBox(height: 15),
+          _buildRecentTransactions(context), // Pass context here
+          const SizedBox(height: 15),
+          _buildMonthlySummaryRow(),
+        ],
+      ),
     );
   }
 
@@ -150,7 +213,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   /// Expense Overview
-  Widget _buildExpenseOverviewCard() {
+  Widget _buildExpenseOverviewCard(BuildContext context) {
+    // Accept context
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -190,7 +254,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(width: 65, height: 65, color: Colors.grey[300]),
+              // Placeholder for the chart/graph
+              Container(
+                width: 65,
+                height: 65,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(8), // Add some rounding
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.bar_chart,
+                    size: 40,
+                    color: Colors.grey[600],
+                  ), // Example icon
+                ),
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -234,7 +313,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   /// Recent Transactions
-  Widget _buildRecentTransactions() {
+  Widget _buildRecentTransactions(BuildContext context) {
+    // Accept context
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -372,57 +452,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  /// Feature Row
-  Widget _buildFeatureRow(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        _buildFeatureCard(context, Icons.history, 'History', () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => TransactionHistoryScreen()),
-          );
-        }),
-        _buildFeatureCard(context, Icons.pie_chart_outline, 'Budget', () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => BudgetPlanning()),
-          );
-        }),
-        _buildFeatureCard(context, Icons.category_outlined, 'Category', () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => CategoryManagementScreen()),
-          );
-        }),
-        _buildFeatureCard(context, Icons.add, 'Add', () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddTransactionScreen()),
-          );
-        }),
-      ],
-    );
-  }
-
-  Widget _buildFeatureCard(
-    BuildContext context,
-    IconData icon,
-    String label,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Icon(icon, color: Colors.black, size: 28),
-          const SizedBox(height: 5),
-          Text(label, style: TextStyle(fontSize: 13)),
         ],
       ),
     );
