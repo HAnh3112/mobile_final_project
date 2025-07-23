@@ -1,4 +1,5 @@
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
+import 'package:final_project/ThemeChanging_HaiAnh/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project/QuynhAnh_screens/add_transaction_screen.dart';
 
@@ -25,7 +26,8 @@ class Transaction {
 }
 
 class TransactionHistoryScreen extends StatefulWidget {
-  const TransactionHistoryScreen({super.key});
+  final bool? showAppBar;
+  TransactionHistoryScreen({this.showAppBar});
 
   @override
   State<TransactionHistoryScreen> createState() =>
@@ -95,12 +97,75 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     return grouped;
   }
 
+  Widget _buildSettingsMenu() {
+    return PopupMenuButton<String>(
+      icon: Icon(Icons.settings, color: currentTheme.sub_text_color, size: 28),
+      onSelected: (value) {
+        if (value == 'signout') {
+          // You might want to navigate to a login screen or perform actual sign-out logic here
+          Navigator.pop(
+            context,
+          ); // This will pop the current route (DashboardScreen)
+        }
+      },
+      color: currentTheme.sub_button_color,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      itemBuilder: (BuildContext context) => [
+        PopupMenuItem(
+          value: 'signout',
+          child: Row(
+            children: [
+              Icon(Icons.logout, color: Colors.red),
+              SizedBox(width: 8),
+              Text("Sign Out", style: TextStyle(color: currentTheme.main_text_color),),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = currentTheme;
 
     return Scaffold(
       backgroundColor: theme.background_color,
+      appBar: (widget.showAppBar == true)? AppBar(
+        leading: IconButton(onPressed: (){
+          setState(() {
+            Navigator.pop(context);
+          });
+        }, icon: Icon(Icons.arrow_back), color: currentTheme.main_text_color,),
+        backgroundColor: currentTheme.background_color,
+        elevation: 0,
+        title: Text(
+          "Transaction History",
+          style: TextStyle(
+            color: currentTheme.main_text_color,
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              (currentTheme == lightTheme) ? Icons.light_mode : Icons.dark_mode,
+              color: currentTheme.sub_text_color,
+              size: 28,
+            ),
+            onPressed: () {
+              setState(() {
+                currentTheme = (currentTheme == lightTheme)
+                    ? darkTheme
+                    : lightTheme;
+              });
+            },
+          ),
+          _buildSettingsMenu(),
+          const SizedBox(width: 8),
+        ],
+      ): null,
       floatingActionButton: FloatingActionButton(
         backgroundColor: theme.main_button_color,
         child: const Icon(Icons.add),
