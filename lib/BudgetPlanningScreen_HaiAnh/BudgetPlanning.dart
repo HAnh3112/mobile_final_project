@@ -31,7 +31,7 @@ class _screenIfNoBudgetExistState extends State<screenIfNoBudgetExist> {
         children: [
           Icon(Icons.radio_button_checked, size: 200, color: Colors.deepPurple),
 
-          SizedBox(height: 5),
+          const SizedBox(height: 5),
 
           Text(
             "No Budgets Set",
@@ -40,7 +40,7 @@ class _screenIfNoBudgetExistState extends State<screenIfNoBudgetExist> {
 
           Text("Create your first budget to track spending!", style: TextStyle(color: currentTheme.main_text_color),),
 
-          SizedBox(height: 5),
+          const SizedBox(height: 5),
 
           Padding(
             padding: const EdgeInsets.all(10.0),
@@ -155,22 +155,22 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                   )
                 ],
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 Text("Total budget:", style: TextStyle(color: Colors.white70),),
                 Text("$totalBudget đ", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
               ]),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 Text("Total spent:", style: TextStyle(color: Colors.white70)),
                 Text("$totalSpent đ", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
               ]),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 Text("Remaining:", style: TextStyle(color: Colors.white70)),
                 Text("$remaining đ", style: TextStyle(fontWeight: FontWeight.bold,color: (remaining<0)? Colors.redAccent:Colors.greenAccent)),
               ]),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Container(
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.deepPurple.shade700),
@@ -207,10 +207,10 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
           ),
         ),
 
-        SizedBox(height: 10,),
+        const SizedBox(height: 10,),
 
 
-        Divider(height: 10, thickness: 2, color: Colors.grey, indent: 22, endIndent: 22),
+        const Divider(height: 10, thickness: 2, color: Colors.grey, indent: 22, endIndent: 22),
 
 
         //Budget List

@@ -3,6 +3,7 @@ import 'package:final_project/BudgetPlanningScreen_HaiAnh/BudgetPlanning.dart';
 import 'package:final_project/DoanAnhVu/transaction_history_screen.dart';
 import 'package:final_project/QuynhAnh_screens/ExpenseBreakdownScreen.dart';
 import 'package:final_project/QuynhAnh_screens/add_transaction_screen.dart';
+import 'package:final_project/screens_Giap/auth_screen.dart';
 import 'package:final_project/screens_Giap/category_management_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/theme.dart';
@@ -119,8 +120,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       onSelected: (value) {
         if (value == 'signout') {
           // You might want to navigate to a login screen or perform actual sign-out logic here
-          Navigator.pop(
-            context,
+          Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (builder) => AuthScreen())
           ); // This will pop the current route (DashboardScreen)
         }
       },
