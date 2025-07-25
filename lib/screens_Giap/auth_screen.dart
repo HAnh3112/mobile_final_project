@@ -140,7 +140,7 @@ class _AuthScreenState extends State<AuthScreen>
             onPressed: () {
               if (_loginFormKey.currentState!.validate()) {
                 // Nếu hợp lệ
-                Navigator.push(
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => DashboardScreen()),
                 );

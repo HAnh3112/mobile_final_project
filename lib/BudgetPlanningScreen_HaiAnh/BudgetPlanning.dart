@@ -1,5 +1,5 @@
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/Budget.dart';
-import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/TestDataBudget.dart';
+import 'package:final_project/BudgetPlanningScreen_HaiAnh/service/budget_service.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,57 +17,6 @@ class BudgetPlanning extends StatelessWidget {
   }
 }
 
-class screenIfNoBudgetExist extends StatefulWidget{
-  @override
-  State<StatefulWidget> createState() => _screenIfNoBudgetExistState();
-}
-
-class _screenIfNoBudgetExistState extends State<screenIfNoBudgetExist> {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.radio_button_checked, size: 200, color: Colors.deepPurple),
-
-          SizedBox(height: 5),
-
-          Text(
-            "No Budgets Set",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: currentTheme.main_text_color),
-          ),
-
-          Text("Create your first budget to track spending!", style: TextStyle(color: currentTheme.main_text_color),),
-
-          SizedBox(height: 5),
-
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context, 
-                  MaterialPageRoute(builder: (context) => AddBudgetScreen())
-                ).then((result){
-                  if(result == true){
-                    setState(() {
-                      
-                    });
-                  }
-                });
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: currentTheme.main_button_color),
-              child: Text("Set New Budget +", style: TextStyle(color: currentTheme.main_button_text_color)),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}
-
-
 
 class BudgetPlanningBody extends StatefulWidget {
   @override
@@ -78,10 +27,11 @@ class BudgetPlanningBody extends StatefulWidget {
 
 class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
   int? editingIndex;
-  TextEditingController editingController = TextEditingController();
-  List<Budget>? allBudgets = mockBudgetsJuly;
+  final TextEditingController editingController = TextEditingController();
+  final budgetService = budget_service();
+  List<Budget>? allBudgets;
 
-  DateFormat dateFormat = DateFormat("MM/yyyy");
+  final DateFormat dateFormat = DateFormat("MM/yyyy");
   DateTime currentDate = DateTime.now();
   DateTime pickedDate = DateTime.now();
 
@@ -100,18 +50,121 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
       lastDate: currentDate,
     );
     if (selected != null) {
+      final budgets = await budgetService.getbudgetList(
+        3, // Replace with actual user ID
+        selected.month,
+        selected.year,
+      );
+
       setState(() {
         pickedDate = selected;
-        allBudgets = mockBudgetsJuly; // replace with actual function that fetch data in database;
+        allBudgets = budgets;
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialBudgets();
+  }
+
+  void _loadInitialBudgets() async {
+    final budgets = await budgetService.getbudgetList(
+      3, // Replace with actual userId if dynamic
+      pickedDate.month,
+      pickedDate.year,
+    );
+
+    setState(() {
+      allBudgets = budgets;
+    });
+  }
+
+
+  Widget _screenIfNoBudgetExist() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const Icon(Icons.radio_button_checked, size: 200, color: Colors.deepPurple),
+
+          const SizedBox(height: 5),
+
+            Text(
+              "No Budgets Set In ${pickedDate.month}/${pickedDate.year}",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: currentTheme.main_text_color),
+            ),
+
+          if(isEditable(pickedDate)) ...[
+            Text("Create your first budget to track spending!", style: TextStyle(color: currentTheme.main_text_color),),
+
+            const SizedBox(height: 5),
+
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(builder: (context) => AddBudgetScreen())
+                  ).then((result){
+                    if(result == true){
+                      setState(() {
+                        
+                      });
+                    }
+                  });
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: currentTheme.main_button_color),
+                child: Text("Set New Budget +", style: TextStyle(color: currentTheme.main_button_text_color)),
+              ),
+            )
+          ]
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     //If no budget found will return a blank page
     if (allBudgets == null || allBudgets!.isEmpty) {
-      return screenIfNoBudgetExist();
+      return Column(
+        children: [
+            Container(
+              width: 400,
+              padding: const EdgeInsets.all(20),
+              margin: const EdgeInsets.fromLTRB(20,20,20,10),
+              decoration: BoxDecoration(
+                  gradient: currentTheme.elevated_background_color,
+                  boxShadow: const [BoxShadow(color: Colors.grey, spreadRadius: 2, blurRadius: 6)],
+                  borderRadius: BorderRadius.circular(20)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Monthly Overview", 
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold, 
+                      fontSize: 20,
+                      color: Colors.white70
+                    )
+                  ),
+                  TextButton.icon(
+                    onPressed: _showMonthPicker,
+                    icon: const Icon(Icons.calendar_today, color: Colors.white),
+                    label: Text(
+                      dateFormat.format(pickedDate),
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  )
+                ],
+              ),
+            ),
+
+            _screenIfNoBudgetExist()
+        ],
+      );
     }
 
     double totalBudget = allBudgets!.fold(0.0, (total, budget) => total + budget.amount);
@@ -125,11 +178,11 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
         //Monthly Overview
         Container(
           width: 400,
-          padding: EdgeInsets.all(20),
-          margin: EdgeInsets.fromLTRB(20,20,20,10),
+          padding: const EdgeInsets.all(20),
+          margin: const EdgeInsets.fromLTRB(20,20,20,10),
           decoration: BoxDecoration(
               gradient: currentTheme.elevated_background_color,
-              boxShadow: [BoxShadow(color: Colors.grey, spreadRadius: 2, blurRadius: 6)],
+              boxShadow: const [BoxShadow(color: Colors.grey, spreadRadius: 2, blurRadius: 6)],
               borderRadius: BorderRadius.circular(20)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,7 +191,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Monthly Overview", 
+                  const Text("Monthly Overview", 
                     style: TextStyle(
                       fontWeight: FontWeight.bold, 
                       fontSize: 20,
@@ -147,30 +200,30 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                   ),
                   TextButton.icon(
                     onPressed: _showMonthPicker,
-                    icon: Icon(Icons.calendar_today, color: Colors.white),
+                    icon: const Icon(Icons.calendar_today, color: Colors.white),
                     label: Text(
                       dateFormat.format(pickedDate),
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   )
                 ],
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text("Total budget:", style: TextStyle(color: Colors.white70),),
-                Text("$totalBudget đ", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                const Text("Total budget:", style: TextStyle(color: Colors.white70),),
+                Text("$totalBudget đ", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
               ]),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text("Total spent:", style: TextStyle(color: Colors.white70)),
-                Text("$totalSpent đ", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                const Text("Total spent:", style: TextStyle(color: Colors.white70)),
+                Text("$totalSpent đ", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
               ]),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text("Remaining:", style: TextStyle(color: Colors.white70)),
+                const Text("Remaining:", style: TextStyle(color: Colors.white70)),
                 Text("$remaining đ", style: TextStyle(fontWeight: FontWeight.bold,color: (remaining<0)? Colors.redAccent:Colors.greenAccent)),
               ]),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Container(
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.deepPurple.shade700),
@@ -188,7 +241,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
         //Navigate to adding budget screen
         Container(
           width: 400,
-          margin: EdgeInsets.symmetric(horizontal: 20),
+          margin: const EdgeInsets.symmetric(horizontal: 20),
           child: ElevatedButton(
             onPressed: () {
               Navigator.push(
@@ -207,10 +260,10 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
           ),
         ),
 
-        SizedBox(height: 10,),
+        const SizedBox(height: 10,),
 
 
-        Divider(height: 10, thickness: 2, color: Colors.grey, indent: 22, endIndent: 22),
+        const Divider(height: 10, thickness: 2, color: Colors.grey, indent: 22, endIndent: 22),
 
 
         //Budget List
@@ -222,8 +275,8 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
               var budget = allBudgets![index];
 
               return Container(
-                padding: EdgeInsets.all(10),
-                margin: EdgeInsets.all(20),
+                padding: const EdgeInsets.all(10),
+                margin: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   border: Border.all(color: currentTheme.sub_button_text_color, width: 2),
                   borderRadius: BorderRadius.circular(10),
@@ -290,7 +343,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                                   });
                                 },
                                 style: IconButton.styleFrom(backgroundColor: Colors.deepPurple),
-                                icon: Icon(Icons.delete, color: Colors.white),
+                                icon: const Icon(Icons.delete, color: Colors.white),
                               )
                             ],
                           ),
@@ -298,7 +351,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                       ),
                       
                     Container(
-                      margin: EdgeInsets.symmetric(vertical: 10),
+                      margin: const EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.deepPurple.shade700),
                       ),

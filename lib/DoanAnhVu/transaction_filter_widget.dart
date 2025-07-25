@@ -1,5 +1,6 @@
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 // Filter data class to hold all filter selections
 class FilterData {
@@ -287,6 +288,7 @@ class _TransactionFilterWidgetState extends State<TransactionFilterWidget> {
                 Expanded(
                   child: TextField(
                     controller: _minAmountController,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     style: TextStyle(color: currentTheme.main_text_color),
                     decoration: InputDecoration(
                       hintText: 'Min Amount',
@@ -310,6 +312,7 @@ class _TransactionFilterWidgetState extends State<TransactionFilterWidget> {
                 Expanded(
                   child: TextField(
                     controller: _maxAmountController,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     style: TextStyle(color: currentTheme.main_text_color),
                     decoration: InputDecoration(
                       hintText: 'Max Amount',
