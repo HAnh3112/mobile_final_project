@@ -1,4 +1,3 @@
-// ... phần import và class Category không đổi
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -6,7 +5,7 @@ import 'package:uuid/uuid.dart';
 class Category {
   final String id;
   final String name;
-  final String icon;
+  final IconData icon;
   final Color color;
 
   Category({
@@ -16,7 +15,7 @@ class Category {
     required this.color,
   });
 
-  Category copyWith({String? name, String? icon, Color? color}) {
+  Category copyWith({String? name, IconData? icon, Color? color}) {
     return Category(
       id: id,
       name: name ?? this.name,
@@ -38,22 +37,22 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
   final List<Category> _categories = [];
   final TextEditingController _nameController = TextEditingController();
 
-  String? _selectedIcon;
+  IconData? _selectedIcon;
   Color _selectedColor = const Color(0xFFFF6B6B);
 
-  final List<String> commonIcons = [
-    '🍔',
-    '🚗',
-    '🛍️',
-    '💡',
-    '🎬',
-    '💰',
-    '🏠',
-    '📱',
-    '⚕️',
-    '🎓',
-    '✈️',
-    '🎮',
+  final List<IconData> commonIcons = [
+    Icons.fastfood,        // Đồ ăn nhanh
+    Icons.directions_car,  // Xe hơi
+    Icons.shopping_bag,    // Mua sắm
+    Icons.lightbulb,       // Điện / ý tưởng
+    Icons.movie,           // Xem phim
+    Icons.attach_money,    // Tiền bạc
+    Icons.home,            // Nhà
+    Icons.smartphone,      // Điện thoại
+    Icons.medical_services, // Y tế
+    Icons.school,          // Giáo dục
+    Icons.flight,          // Du lịch
+    Icons.sports_esports,  // Game
   ];
 
   final List<Color> commonColors = [
@@ -122,14 +121,12 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                     );
 
                     return RawChip(
-                      label: Text(
+                      label: Icon(
                         icon,
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: isSelected
-                              ? Colors.white
-                              : theme.main_text_color,
-                        ),
+                        size: 20,
+                        color: isSelected
+                            ? Colors.white
+                            : theme.main_text_color,
                       ),
                       selected: isSelected,
                       onSelected: isUsedByOther
@@ -140,7 +137,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                       selectedColor: Colors.lightBlueAccent,
                       backgroundColor: theme.background_color,
                       disabledColor: Colors.grey[300],
-                      showCheckmark: false, //
+                      showCheckmark: false,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -286,7 +283,11 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text("📂", style: TextStyle(fontSize: 48)),
+                  Icon(
+                    Icons.folder_open,
+                    size: 48,
+                    color: theme.sub_text_color,
+                  ),
                   Text(
                     "No Categories Yet",
                     style: TextStyle(
@@ -314,7 +315,11 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: category.color,
-                      child: Text(category.icon),
+                      child: Icon(
+                        category.icon,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
                     title: Text(
                       category.name,
