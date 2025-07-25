@@ -18,4 +18,18 @@ class Budget {
     required this.month,
     required this.year,
   });
+
+  factory Budget.fromJson(Map<String, dynamic> json) {
+    return Budget(
+      budgetId: json['budgetId'],
+      userId: json['userId'],
+      categoryId: json['categoryId'],
+      categoryName: json['categoryName'],
+      amount: (json['amount'] as num).toDouble(),
+      spentAmount: (json['spentAmount'] as num).toDouble(),
+      month: json['month'],
+      year: json['year'],
+    );
+  }
+  
 }

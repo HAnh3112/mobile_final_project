@@ -1,5 +1,5 @@
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/Budget.dart';
-import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/TestDataBudget.dart';
+import 'package:final_project/BudgetPlanningScreen_HaiAnh/service/budget_service.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,57 +17,6 @@ class BudgetPlanning extends StatelessWidget {
   }
 }
 
-class screenIfNoBudgetExist extends StatefulWidget{
-  @override
-  State<StatefulWidget> createState() => _screenIfNoBudgetExistState();
-}
-
-class _screenIfNoBudgetExistState extends State<screenIfNoBudgetExist> {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.radio_button_checked, size: 200, color: Colors.deepPurple),
-
-          const SizedBox(height: 5),
-
-          Text(
-            "No Budgets Set",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: currentTheme.main_text_color),
-          ),
-
-          Text("Create your first budget to track spending!", style: TextStyle(color: currentTheme.main_text_color),),
-
-          const SizedBox(height: 5),
-
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context, 
-                  MaterialPageRoute(builder: (context) => AddBudgetScreen())
-                ).then((result){
-                  if(result == true){
-                    setState(() {
-                      
-                    });
-                  }
-                });
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: currentTheme.main_button_color),
-              child: Text("Set New Budget +", style: TextStyle(color: currentTheme.main_button_text_color)),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}
-
-
 
 class BudgetPlanningBody extends StatefulWidget {
   @override
@@ -79,7 +28,8 @@ class BudgetPlanningBody extends StatefulWidget {
 class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
   int? editingIndex;
   final TextEditingController editingController = TextEditingController();
-  List<Budget>? allBudgets = mockBudgetsJuly;
+  final budgetService = budget_service();
+  List<Budget>? allBudgets;
 
   final DateFormat dateFormat = DateFormat("MM/yyyy");
   DateTime currentDate = DateTime.now();
@@ -100,18 +50,121 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
       lastDate: currentDate,
     );
     if (selected != null) {
+      final budgets = await budgetService.getbudgetList(
+        3, // Replace with actual user ID
+        selected.month,
+        selected.year,
+      );
+
       setState(() {
         pickedDate = selected;
-        allBudgets = mockBudgetsJuly; // replace with actual function that fetch data in database;
+        allBudgets = budgets;
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialBudgets();
+  }
+
+  void _loadInitialBudgets() async {
+    final budgets = await budgetService.getbudgetList(
+      3, // Replace with actual userId if dynamic
+      pickedDate.month,
+      pickedDate.year,
+    );
+
+    setState(() {
+      allBudgets = budgets;
+    });
+  }
+
+
+  Widget _screenIfNoBudgetExist() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const Icon(Icons.radio_button_checked, size: 200, color: Colors.deepPurple),
+
+          const SizedBox(height: 5),
+
+            Text(
+              "No Budgets Set In ${pickedDate.month}/${pickedDate.year}",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: currentTheme.main_text_color),
+            ),
+
+          if(isEditable(pickedDate)) ...[
+            Text("Create your first budget to track spending!", style: TextStyle(color: currentTheme.main_text_color),),
+
+            const SizedBox(height: 5),
+
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(builder: (context) => AddBudgetScreen())
+                  ).then((result){
+                    if(result == true){
+                      setState(() {
+                        
+                      });
+                    }
+                  });
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: currentTheme.main_button_color),
+                child: Text("Set New Budget +", style: TextStyle(color: currentTheme.main_button_text_color)),
+              ),
+            )
+          ]
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     //If no budget found will return a blank page
     if (allBudgets == null || allBudgets!.isEmpty) {
-      return screenIfNoBudgetExist();
+      return Column(
+        children: [
+            Container(
+              width: 400,
+              padding: const EdgeInsets.all(20),
+              margin: const EdgeInsets.fromLTRB(20,20,20,10),
+              decoration: BoxDecoration(
+                  gradient: currentTheme.elevated_background_color,
+                  boxShadow: const [BoxShadow(color: Colors.grey, spreadRadius: 2, blurRadius: 6)],
+                  borderRadius: BorderRadius.circular(20)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Monthly Overview", 
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold, 
+                      fontSize: 20,
+                      color: Colors.white70
+                    )
+                  ),
+                  TextButton.icon(
+                    onPressed: _showMonthPicker,
+                    icon: const Icon(Icons.calendar_today, color: Colors.white),
+                    label: Text(
+                      dateFormat.format(pickedDate),
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  )
+                ],
+              ),
+            ),
+
+            _screenIfNoBudgetExist()
+        ],
+      );
     }
 
     double totalBudget = allBudgets!.fold(0.0, (total, budget) => total + budget.amount);
