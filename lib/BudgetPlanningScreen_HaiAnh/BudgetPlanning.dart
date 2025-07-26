@@ -1,4 +1,4 @@
-import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/Budget.dart';
+import 'package:final_project/model/Budget.dart';
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/service/budget_service.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +29,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
   int? editingIndex;
   final TextEditingController editingController = TextEditingController();
   final budgetService = budget_service();
+  bool isLoading = false;
   List<Budget>? allBudgets;
 
   final DateFormat dateFormat = DateFormat("MM/yyyy");
@@ -42,6 +43,23 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
         (date.year == lastMonth.year && date.month == lastMonth.month);
   }
 
+  void _loadInitialBudgets() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    final budgets = await budgetService.getbudgetList(
+      3, // Replace with actual userId if dynamic
+      pickedDate.month,
+      pickedDate.year,
+    );
+
+    setState(() {
+      allBudgets = budgets;
+      isLoading = false;
+    });
+  }
+
   void _showMonthPicker() async {
     final selected = await showMonthPicker(
       context: context,
@@ -50,8 +68,12 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
       lastDate: currentDate,
     );
     if (selected != null) {
+      setState(() {
+        isLoading = true;
+      });
+
       final budgets = await budgetService.getbudgetList(
-        3, // Replace with actual user ID
+        3,
         selected.month,
         selected.year,
       );
@@ -59,6 +81,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
       setState(() {
         pickedDate = selected;
         allBudgets = budgets;
+        isLoading = false;
       });
     }
   }
@@ -69,20 +92,28 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
     _loadInitialBudgets();
   }
 
-  void _loadInitialBudgets() async {
-    final budgets = await budgetService.getbudgetList(
-      3, // Replace with actual userId if dynamic
-      pickedDate.month,
-      pickedDate.year,
-    );
-
-    setState(() {
-      allBudgets = budgets;
-    });
+  @override
+  void dispose() {
+    editingController.dispose();
+    super.dispose();
   }
 
 
   Widget _screenIfNoBudgetExist() {
+    if (isLoading) {
+      return Center(child: Column(
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: 30,),
+          Text("First few run might take a while, please wait...", style: TextStyle(
+            color: currentTheme.main_text_color,
+            fontWeight: FontWeight.bold,
+            fontSize: 15
+            ),
+          )
+        ],
+      ));
+    }
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -274,94 +305,107 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
               bool isEditing = editingIndex == index;
               var budget = allBudgets![index];
 
-              return Container(
-                padding: const EdgeInsets.all(10),
-                margin: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  border: Border.all(color: currentTheme.sub_button_text_color, width: 2),
-                  borderRadius: BorderRadius.circular(10),
-                  color: currentTheme.sub_button_color
+              return Dismissible(
+                key: Key(allBudgets![index].budgetId.toString()),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.redAccent
+                  ),
+                  alignment: AlignmentDirectional.centerEnd,
+                  padding: const EdgeInsets.all(10),
+                  child: const Icon(Icons.delete,color: Colors.white,),
                 ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(flex: 2, child: Text(budget.categoryName, 
-                          style: TextStyle(color: currentTheme.sub_button_text_color),)
-                        ),
+                onDismissed: (direction) {
+                  // Remove from local list
+                  
+                  setState(() {
+                    allBudgets!.removeAt(index);
+                  });
 
-                        Spacer(),
-
-                        Expanded(
-                          flex: 2,
-                          child: isEditing
-                              ? TextField(
-                                  controller: editingController,
-                                  style: TextStyle(color: currentTheme.sub_button_text_color),
-                                  decoration: InputDecoration(hintText: "Enter new amount"),
-                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                )
-                              : Text("${budget.spentAmount}/${budget.amount} đ",style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: (budget.spentAmount > budget.amount)? Colors.red:Colors.green
-                                ),),
-                        ),
-
-                        if (isEditable(pickedDate))
-                          Expanded(
-                            flex: 1,
-                            child: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  if (isEditing) {
-                                    // UPDATE DATA FUNCTION HERE
-                                    editingIndex = null;
-                                  } else {
-                                    editingIndex = index;
-                                    editingController.text = budget.amount.toString();
-                                  }
-                                });
-                              },
-                              icon: Icon(isEditing ? Icons.save : Icons.edit, color: currentTheme.sub_button_text_color,),
-                            ),
+                  //CALL DELETE METHOD HERE
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  margin: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: currentTheme.sub_button_text_color, width: 2),
+                    borderRadius: BorderRadius.circular(10),
+                    color: currentTheme.sub_button_color
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(flex: 2, child: Text(budget.categoryName, 
+                            style: TextStyle(color: currentTheme.sub_button_text_color),)
                           ),
-                      ],
-                    ),
-                    if (isEditing)
-                      Align(
-                        alignment: Alignment.center,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 10.0),
-                          child: Row(
-                            children: [
-                              Text("Editing ${budget.categoryName} budget", style: TextStyle(color: Colors.grey)),
-                              Spacer(),
-                              IconButton(
+
+                          Expanded(flex: 1, child: Icon(IconData(budget.iconCode, fontFamily: 'MaterialIcons')),),
+                
+                          Spacer(),
+                
+                          Expanded(
+                            flex: 2,
+                            child: isEditing
+                                ? TextField(
+                                    controller: editingController,
+                                    style: TextStyle(color: currentTheme.sub_button_text_color),
+                                    decoration: InputDecoration(hintText: "Enter new amount"),
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                  )
+                                : Text("${budget.spentAmount}/${budget.amount} đ",style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: (budget.spentAmount > budget.amount)? Colors.red:Colors.green
+                                  ),),
+                          ),
+                
+                          if (isEditable(pickedDate))
+                            Expanded(
+                              flex: 1,
+                              child: IconButton(
                                 onPressed: () {
                                   setState(() {
-                                    // DELETE FUNCTION BASE ON ID HERE
+                                    if (isEditing) {
+                                      // UPDATE DATA FUNCTION HERE
+                                      editingIndex = null;
+                                    } else {
+                                      editingIndex = index;
+                                      editingController.text = budget.amount.toString();
+                                    }
                                   });
                                 },
-                                style: IconButton.styleFrom(backgroundColor: Colors.deepPurple),
-                                icon: const Icon(Icons.delete, color: Colors.white),
-                              )
-                            ],
+                                icon: Icon(isEditing ? Icons.save : Icons.edit, color: currentTheme.sub_button_text_color,),
+                              ),
+                            ),
+                        ],
+                      ),
+                      if (isEditing)
+                        Align(
+                          alignment: Alignment.center,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 10.0),
+                            child: Row(
+                              children: [
+                                Text("Editing ${budget.categoryName} budget", style: TextStyle(color: Colors.grey)),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      
-                    Container(
-                      margin: const EdgeInsets.symmetric(vertical: 10),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.deepPurple.shade700),
-                      ),
-                      child: LinearProgressIndicator(
-                        value: (budget.amount == 0)?   0 : budget.spentAmount / budget.amount,
-                        backgroundColor: Colors.deepPurple.shade100,
-                        color: Colors.deepPurple,
-                      ),
-                    )
-                  ],
+                        
+                      Container(
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.deepPurple.shade700),
+                        ),
+                        child: LinearProgressIndicator(
+                          value: (budget.amount == 0)?   0 : budget.spentAmount / budget.amount,
+                          backgroundColor: Colors.deepPurple.shade100,
+                          color: Colors.deepPurple,
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               );
             },

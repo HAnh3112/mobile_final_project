@@ -120,8 +120,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       onSelected: (value) {
         if (value == 'signout') {
           // You might want to navigate to a login screen or perform actual sign-out logic here
-          Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (builder) => AuthScreen())
+          Navigator.pushAndRemoveUntil(
+            context, MaterialPageRoute(builder: (builder) => AuthScreen()),
+            (Route<dynamic> route) => false
           ); // This will pop the current route (DashboardScreen)
         }
       },

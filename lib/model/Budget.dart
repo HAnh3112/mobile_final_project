@@ -3,6 +3,7 @@ class Budget {
   final int userId;
   final int categoryId;
   final String categoryName;
+  final int iconCode;
   final double amount;
   final double spentAmount;
   final int month;
@@ -13,6 +14,7 @@ class Budget {
     required this.userId,
     required this.categoryId,
     required this.categoryName,
+    required this.iconCode,
     required this.amount,
     required this.spentAmount,
     required this.month,
@@ -25,6 +27,7 @@ class Budget {
       userId: json['userId'],
       categoryId: json['categoryId'],
       categoryName: json['categoryName'],
+      iconCode: json['iconCode'],
       amount: (json['amount'] as num).toDouble(),
       spentAmount: (json['spentAmount'] as num).toDouble(),
       month: json['month'],

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:final_project/API%20IP/ip_address.dart';
-import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/Budget.dart';
+import 'package:final_project/model/Budget.dart';
 import 'package:http/http.dart' as http;
 
 class budget_service{
@@ -13,6 +13,8 @@ class budget_service{
         'year': year.toString(),
       },
     );
+    
+    print("Data is being fetch...");
 
     final response = await http.get(url);
 

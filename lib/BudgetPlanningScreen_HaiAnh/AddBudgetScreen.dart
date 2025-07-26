@@ -1,9 +1,9 @@
-import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/Budget.dart';
-import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/TestDataBudget.dart';
+import 'package:final_project/model/Budget.dart';
+import 'package:final_project/testData/TestDataBudget.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/Category.dart';
-import 'package:final_project/BudgetPlanningScreen_HaiAnh/model/TestDataCategory.dart';
+import 'package:final_project/model/Category.dart';
+import 'package:final_project/testData/TestDataCategory.dart';
 import 'package:flutter/services.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:intl/intl.dart';
@@ -190,6 +190,7 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
                         userId: 101, 
                         categoryId: selectedValue!.categoryId, 
                         categoryName: selectedValue!.categoryName, 
+                        iconCode: 12312,
                         amount: amt, 
                         spentAmount: 100, 
                         month: selectedMonth.month, 
