@@ -176,7 +176,7 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
                 child: ElevatedButton(
                   onPressed: () {
                     final amt = double.tryParse(_amountController.text.trim());
-                    if (selectedValue == null || amt == null) {
+                    if (selectedValue == null || amt == null || amt == 0) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text("Please enter a valid amount and category.")),
                       );

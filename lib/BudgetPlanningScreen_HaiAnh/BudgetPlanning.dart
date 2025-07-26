@@ -307,7 +307,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
 
               return Dismissible(
                 key: Key(allBudgets![index].budgetId.toString()),
-                direction: DismissDirection.endToStart,
+                direction: (!isEditable(pickedDate))? DismissDirection.none:DismissDirection.endToStart,
                 background: Container(
                   decoration: const BoxDecoration(
                     color: Colors.redAccent
@@ -320,6 +320,13 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                   // Remove from local list
                   
                   setState(() {
+                    if (editingIndex != null) {
+                      if (editingIndex == index) {
+                        editingIndex = null; 
+                      } else if (editingIndex! > index) {
+                        editingIndex = editingIndex! - 1;
+                      }
+                    }
                     allBudgets!.removeAt(index);
                   });
 
@@ -329,84 +336,105 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                   padding: const EdgeInsets.all(10),
                   margin: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    border: Border.all(color: currentTheme.sub_button_text_color, width: 2),
+                    border: Border.all(
+                      color: currentTheme.sub_button_text_color,
+                      width: 2,
+                    ),
                     borderRadius: BorderRadius.circular(10),
-                    color: currentTheme.sub_button_color
+                    color: currentTheme.sub_button_color,
                   ),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // === Top Row: Icon | Category Name | Edit Button ===
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Expanded(flex: 2, child: Text(budget.categoryName, 
-                            style: TextStyle(color: currentTheme.sub_button_text_color),)
+                          Icon(
+                            IconData(budget.iconCode, fontFamily: 'MaterialIcons'),
+                            color: currentTheme.sub_button_text_color,
                           ),
-
-                          Expanded(flex: 1, child: Icon(IconData(budget.iconCode, fontFamily: 'MaterialIcons')),),
-                
-                          Spacer(),
-                
+                          const SizedBox(width: 10),
                           Expanded(
-                            flex: 2,
-                            child: isEditing
-                                ? TextField(
-                                    controller: editingController,
-                                    style: TextStyle(color: currentTheme.sub_button_text_color),
-                                    decoration: InputDecoration(hintText: "Enter new amount"),
-                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                  )
-                                : Text("${budget.spentAmount}/${budget.amount} đ",style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: (budget.spentAmount > budget.amount)? Colors.red:Colors.green
-                                  ),),
-                          ),
-                
-                          if (isEditable(pickedDate))
-                            Expanded(
-                              flex: 1,
-                              child: IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    if (isEditing) {
-                                      // UPDATE DATA FUNCTION HERE
-                                      editingIndex = null;
-                                    } else {
-                                      editingIndex = index;
-                                      editingController.text = budget.amount.toString();
-                                    }
-                                  });
-                                },
-                                icon: Icon(isEditing ? Icons.save : Icons.edit, color: currentTheme.sub_button_text_color,),
+                            child: Text(
+                              budget.categoryName,
+                              style: TextStyle(
+                                color: currentTheme.sub_button_text_color,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
                               ),
+                            ),
+                          ),
+                          if (isEditable(pickedDate))
+                            IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  if (isEditing) {
+                                    // Update data logic here
+                                    editingIndex = null;
+                                  } else {
+                                    editingIndex = index;
+                                    editingController.text = budget.amount.toString();
+                                  }
+                                });
+                              },
+                              icon: Icon(
+                                isEditing ? Icons.save : Icons.edit,
+                                color: currentTheme.sub_button_text_color,
+                              ),
+                              tooltip: isEditing ? "Save" : "Edit",
                             ),
                         ],
                       ),
-                      if (isEditing)
-                        Align(
-                          alignment: Alignment.center,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 10.0),
-                            child: Row(
-                              children: [
-                                Text("Editing ${budget.categoryName} budget", style: TextStyle(color: Colors.grey)),
-                              ],
+
+                      const SizedBox(height: 10),
+
+                      // === Amount Row ===
+                      (isEditing)?
+                          TextField(
+                              controller: editingController,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              style: TextStyle(color: currentTheme.sub_button_text_color),
+                              decoration: const InputDecoration(
+                                hintText: "Enter new amount",
+                                hintStyle: TextStyle(color: Colors.grey),
+                              ),
+                            )
+                          : Text(
+                              "${budget.spentAmount} / ${budget.amount} đ",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: (budget.spentAmount > budget.amount)
+                                    ? Colors.red
+                                    : Colors.green,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
-                          ),
+
+                      const SizedBox(height: 10),
+
+                      // === Editing Message ===
+                      if (isEditing)
+                        Text(
+                          "Editing ${budget.categoryName} budget",
+                          style: const TextStyle(color: Colors.grey),
                         ),
-                        
-                      Container(
-                        margin: const EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.deepPurple.shade700),
-                        ),
-                        child: LinearProgressIndicator(
-                          value: (budget.amount == 0)?   0 : budget.spentAmount / budget.amount,
-                          backgroundColor: Colors.deepPurple.shade100,
-                          color: Colors.deepPurple,
-                        ),
-                      )
+
+                      const SizedBox(height: 10),
+
+                      // === Progress Bar ===
+                      LinearProgressIndicator(
+                        value: (budget.amount == 0)
+                            ? 0
+                            : (budget.spentAmount / budget.amount).clamp(0.0, 1.0),
+                        backgroundColor: Colors.deepPurple.shade100,
+                        color: Colors.deepPurple,
+                      ),
                     ],
                   ),
-                ),
+                )
               );
             },
           ),
