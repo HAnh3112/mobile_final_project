@@ -7,12 +7,14 @@ class Category {
   final String name;
   final IconData icon;
   final Color color;
+  final String type; // Income hoặc Expense
 
   Category({
     required this.id,
     required this.name,
     required this.icon,
     required this.color,
+    required this.type,
   });
 
   Category copyWith({String? name, IconData? icon, Color? color}) {
@@ -21,6 +23,7 @@ class Category {
       name: name ?? this.name,
       icon: icon ?? this.icon,
       color: color ?? this.color,
+      type: type, // không cho sửa type
     );
   }
 }
@@ -39,20 +42,21 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
 
   IconData? _selectedIcon;
   Color _selectedColor = const Color(0xFFFF6B6B);
+  String? _selectedType;
 
   final List<IconData> commonIcons = [
-    Icons.fastfood,        // Đồ ăn nhanh
-    Icons.directions_car,  // Xe hơi
-    Icons.shopping_bag,    // Mua sắm
-    Icons.lightbulb,       // Điện / ý tưởng
-    Icons.movie,           // Xem phim
-    Icons.attach_money,    // Tiền bạc
-    Icons.home,            // Nhà
-    Icons.smartphone,      // Điện thoại
-    Icons.medical_services, // Y tế
-    Icons.school,          // Giáo dục
-    Icons.flight,          // Du lịch
-    Icons.sports_esports,  // Game
+    Icons.fastfood,
+    Icons.directions_car,
+    Icons.shopping_bag,
+    Icons.lightbulb,
+    Icons.movie,
+    Icons.attach_money,
+    Icons.home,
+    Icons.smartphone,
+    Icons.medical_services,
+    Icons.school,
+    Icons.flight,
+    Icons.sports_esports,
   ];
 
   final List<Color> commonColors = [
@@ -72,6 +76,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     _nameController.text = existing?.name ?? '';
     _selectedIcon = existing?.icon;
     _selectedColor = existing?.color ?? const Color(0xFFFF6B6B);
+    _selectedType = existing?.type;
 
     showDialog(
       context: context,
@@ -85,6 +90,44 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
           content: SingleChildScrollView(
             child: Column(
               children: [
+                if (existing == null)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Category Type",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      Row(
+                        children: ["Income", "Expense"].map((type) {
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Radio<String>(
+                                value: type,
+                                groupValue: _selectedType,
+                                onChanged: (value) {
+                                  setStateDialog(() => _selectedType = value);
+                                },
+                              ),
+                              Text(type),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  )
+                else
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        "Type: ${existing.type}",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
                 TextField(
                   controller: _nameController,
                   style: TextStyle(color: Colors.black),
@@ -121,12 +164,16 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                     );
 
                     return RawChip(
-                      label: Icon(
-                        icon,
-                        size: 20,
-                        color: isSelected
-                            ? Colors.white
-                            : theme.main_text_color,
+                      // ĐÃ CHỈNH PHẦN DƯỚI ĐỂ ICON MỜ NẾU ĐÃ DÙNG
+                      label: Opacity(
+                        opacity: isUsedByOther ? 0.3 : 1.0,
+                        child: Icon(
+                          icon,
+                          size: 20,
+                          color: isSelected
+                              ? Colors.white
+                              : theme.main_text_color,
+                        ),
                       ),
                       selected: isSelected,
                       onSelected: isUsedByOther
@@ -137,7 +184,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                       selectedColor: Colors.lightBlueAccent,
                       backgroundColor: theme.background_color,
                       disabledColor: Colors.grey[300],
-                      showCheckmark: false,
+                      showCheckmark: false, // Không có dấu ✔
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -192,7 +239,11 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
               ),
               onPressed: () {
                 final name = _nameController.text.trim();
-                if (name.isEmpty || _selectedIcon == null) return;
+                if (name.isEmpty ||
+                    _selectedIcon == null ||
+                    (_selectedType == null && existing == null)) {
+                  return;
+                }
 
                 final nameExists = _categories.any(
                   (cat) =>
@@ -236,6 +287,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                     name: name,
                     icon: _selectedIcon!,
                     color: _selectedColor,
+                    type: _selectedType!,
                   );
                   setState(() => _categories.add(newCategory));
                 }
@@ -315,18 +367,14 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: category.color,
-                      child: Icon(
-                        category.icon,
-                        color: Colors.white,
-                        size: 20,
-                      ),
+                      child: Icon(category.icon, color: Colors.white, size: 20),
                     ),
                     title: Text(
                       category.name,
                       style: TextStyle(color: theme.main_text_color),
                     ),
                     subtitle: Text(
-                      "Category",
+                      category.type,
                       style: TextStyle(color: theme.sub_text_color),
                     ),
                     trailing: Row(
