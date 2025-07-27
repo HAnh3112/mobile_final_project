@@ -19,6 +19,7 @@ class _AuthScreenState extends State<AuthScreen>
   final _loginEmailController = TextEditingController();
   final _loginPasswordController = TextEditingController();
 
+  final _signupUsernameController = TextEditingController();
   final _signupEmailController = TextEditingController();
   final _signupPasswordController = TextEditingController();
   final _signupConfirmPasswordController = TextEditingController();
@@ -34,6 +35,8 @@ class _AuthScreenState extends State<AuthScreen>
     _tabController.dispose();
     _loginEmailController.dispose();
     _loginPasswordController.dispose();
+
+    _signupUsernameController.dispose(); // 👈 THÊM
     _signupEmailController.dispose();
     _signupPasswordController.dispose();
     _signupConfirmPasswordController.dispose();
@@ -110,7 +113,7 @@ class _AuthScreenState extends State<AuthScreen>
                       ),
                       const SizedBox(height: 16),
                       SizedBox(
-                        height: 350,
+                        height: 400,
                         child: TabBarView(
                           controller: _tabController,
                           children: [buildLoginTab(), buildSignUpTab()],
@@ -139,7 +142,6 @@ class _AuthScreenState extends State<AuthScreen>
           ElevatedButton(
             onPressed: () {
               if (_loginFormKey.currentState!.validate()) {
-                // Nếu hợp lệ
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => DashboardScreen()),
@@ -168,6 +170,8 @@ class _AuthScreenState extends State<AuthScreen>
       key: _signupFormKey,
       child: Column(
         children: [
+          buildUsernameInput(controller: _signupUsernameController), // 👈 THÊM
+          const SizedBox(height: 16),
           buildEmailInput(controller: _signupEmailController),
           const SizedBox(height: 16),
           buildPasswordInput(
@@ -191,7 +195,11 @@ class _AuthScreenState extends State<AuthScreen>
             onPressed: () {
               if (_signupFormKey.currentState!.validate()) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Account created!")),
+                  SnackBar(
+                    content: Text(
+                      "Account created for ${_signupUsernameController.text}!",
+                    ),
+                  ),
                 );
               }
             },
@@ -217,7 +225,7 @@ class _AuthScreenState extends State<AuthScreen>
       controller: controller,
       validator: (value) {
         if (value == null || value.isEmpty) return 'Email is required';
-        if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value))
+        if (!RegExp(r'^[^@]+@gmail\.com$').hasMatch(value))
           return 'Enter a valid email';
         return null;
       },
@@ -252,6 +260,26 @@ class _AuthScreenState extends State<AuthScreen>
           icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
           onPressed: () => setState(() => _showPassword = !_showPassword),
         ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
+  Widget buildUsernameInput({required TextEditingController controller}) {
+    return TextFormField(
+      controller: controller,
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'User name is required';
+        }
+        if (value.trim().length < 3) {
+          return 'User name must be at least 3 characters';
+        }
+        return null;
+      },
+      decoration: InputDecoration(
+        labelText: "User Name",
+        prefixIcon: const Icon(Icons.person),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
