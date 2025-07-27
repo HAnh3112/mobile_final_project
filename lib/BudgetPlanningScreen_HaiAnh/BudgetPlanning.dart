@@ -316,21 +316,31 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                   padding: const EdgeInsets.all(10),
                   child: const Icon(Icons.delete,color: Colors.white,),
                 ),
-                onDismissed: (direction) {
-                  // Remove from local list
-                  
-                  setState(() {
-                    if (editingIndex != null) {
-                      if (editingIndex == index) {
-                        editingIndex = null; 
-                      } else if (editingIndex! > index) {
-                        editingIndex = editingIndex! - 1;
-                      }
-                    }
-                    allBudgets!.removeAt(index);
-                  });
+                onDismissed: (direction) async {
+                  final budget = allBudgets![index];
 
-                  //CALL DELETE METHOD HERE
+                  try {
+                    String result = await budgetService.deleteBudget(budget.budgetId); // Wait for success
+
+                    setState(() {
+                      if (editingIndex != null) {
+                        if (editingIndex == index) {
+                          editingIndex = null;
+                        } else if (editingIndex! > index) {
+                          editingIndex = editingIndex! - 1;
+                        }
+                      }
+                      allBudgets!.removeAt(index); // Now safe to update local state
+                    });
+
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(result),
+                    ));
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text('Failed to delete budget'),
+                    ));
+                  }
                 },
                 child: Container(
                   padding: const EdgeInsets.all(10),
@@ -367,16 +377,31 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                           ),
                           if (isEditable(pickedDate))
                             IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  if (isEditing) {
-                                    // Update data logic here
-                                    editingIndex = null;
-                                  } else {
+                              onPressed: () async {
+                                if (isEditing) {
+                                  try{
+                                    final amt = double.parse(editingController.text);
+                                    String result = await budgetService.editBudget(allBudgets![editingIndex!].budgetId,amt);
+
+                                    setState(() {
+                                        // Update data logic here
+                                        allBudgets![index].amount = amt;
+                                        editingIndex = null;
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                      content: Text(result),
+                                    ));
+                                  }catch(e){
+                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                      content: Text('Failed to update budget'),
+                                    ));
+                                  }
+                                } else {
+                                  setState(() {
                                     editingIndex = index;
                                     editingController.text = budget.amount.toString();
-                                  }
-                                });
+                                  });
+                                }
                               },
                               icon: Icon(
                                 isEditing ? Icons.save : Icons.edit,

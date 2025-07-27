@@ -27,4 +27,37 @@ class budget_service{
       throw Exception('Failed to fetch budgets');
     }
   }
+
+  Future<String> editBudget(int id, double amount) async {
+    final url = Uri.http(currentHost, "/api/budget/update", 
+      {
+        'id': id.toString(),
+        'amount': amount.toString()
+      }
+    );
+
+    final response = await http.put(url);
+
+    if (response.statusCode == 200) {
+      print("Success!");
+      return ("Success!");
+    } else {
+      print("Failed");
+      throw Exception('Failed to update budget');
+    }
+  }
+
+  Future<String> deleteBudget(int id) async{
+    final url = Uri.http(currentHost, "/api/budget/delete", {'id': id.toString()});
+
+    final response = await http.delete(url);
+
+    if (response.statusCode == 200) {
+      print("Success!");
+      return ("Success!");
+    } else {
+      print("Failed");
+      throw Exception('Failed to delete budget');
+    }
+  }
 }

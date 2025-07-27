@@ -4,7 +4,7 @@ class Budget {
   final int categoryId;
   final String categoryName;
   final int iconCode;
-  final double amount;
+  double amount;
   final double spentAmount;
   final int month;
   final int year;
