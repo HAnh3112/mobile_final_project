@@ -1,14 +1,18 @@
+import 'package:final_project/BudgetPlanningScreen_HaiAnh/service/budget_service.dart';
+import 'package:final_project/model/AvailableCategory.dart';
 import 'package:final_project/model/Budget.dart';
 import 'package:final_project/testData/TestDataBudget.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:final_project/model/Category.dart';
-import 'package:final_project/testData/TestDataCategory.dart';
 import 'package:flutter/services.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:intl/intl.dart';
 
 class AddBudgetScreen extends StatelessWidget {
+  final DateTime selectedMonthFromPlanningScreen;
+
+  const AddBudgetScreen({super.key, required this.selectedMonthFromPlanningScreen});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,23 +30,43 @@ class AddBudgetScreen extends StatelessWidget {
         backgroundColor: currentTheme.tab_bar_color,
         elevation: 2,
       ),
-      body: AddBudgetScreenBody(),
+      body: AddBudgetScreenBody(selectedMonthFromPlanningScreen: selectedMonthFromPlanningScreen,),
     );
   }
 }
 
 class AddBudgetScreenBody extends StatefulWidget {
+  final DateTime selectedMonthFromPlanningScreen;
+
+  const AddBudgetScreenBody({super.key, required this.selectedMonthFromPlanningScreen});
+
   @override
   State<StatefulWidget> createState() => _AddBudgetScreenBodyState();
 }
 
 class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
-  List<Category> categoryList = mockCategory;
-  Category? selectedValue;
-  final TextEditingController _amountController = TextEditingController();
+  List<AvailableCategory> categoryList = [];
+  AvailableCategory? selectedValue;
 
-  DateTime selectedMonth = DateTime.now();
+  final TextEditingController _amountController = TextEditingController();
+  final budget_service budgetService = budget_service();
+
+  DateTime? selectedMonth;
   final DateFormat monthFormat = DateFormat('MM/yyyy');
+
+  void _fetchAvailableCategory() async{
+    final result = await budgetService.getAvailavleCategory(3, selectedMonth!.month, selectedMonth!.year);
+    setState(() {
+      categoryList = result;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    selectedMonth = widget.selectedMonthFromPlanningScreen;
+    _fetchAvailableCategory();
+  }
 
   @override
   void dispose() {
@@ -71,7 +95,7 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
 
           TextButton.icon(
             icon: const Icon(Icons.calendar_today, color: Colors.deepPurple),
-            label: Text(monthFormat.format(selectedMonth),
+            label: Text(monthFormat.format(selectedMonth!),
                 style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold,fontSize: 20)),
             onPressed: () async {
               final picked = await showMonthPicker(
@@ -80,7 +104,12 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
                 firstDate: DateTime(DateTime.now().year - 1, DateTime.now().month),
                 lastDate: DateTime.now(),
               );
-              if (picked != null) setState(() => selectedMonth = picked);
+              if (picked != null) {
+                setState(() {
+                  selectedMonth = picked;
+                });
+                _fetchAvailableCategory(); // <-- reload category list for new month
+              }
             },
           ),
 
@@ -147,7 +176,7 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
               border: Border.all(color: Colors.grey.shade300),
             ),
             child: DropdownButtonHideUnderline(
-              child: DropdownButton<Category>(
+              child: DropdownButton<AvailableCategory>(
                 value: selectedValue,
                 dropdownColor: currentTheme.sub_button_color,
                 hint: Text("Choose a category",style: TextStyle(color: currentTheme.sub_button_text_color),),
@@ -155,7 +184,7 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
                 items: categoryList.map((category) {
                   return DropdownMenuItem(
                     value: category, 
-                    child: Text(category.categoryName, style: TextStyle(color: currentTheme.sub_button_text_color),));
+                    child: Text(category.name, style: TextStyle(color: currentTheme.sub_button_text_color),));
                 }).toList(),
                 onChanged: (newVal) {
                   setState(() {
@@ -174,7 +203,7 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     final amt = double.tryParse(_amountController.text.trim());
                     if (selectedValue == null || amt == null || amt == 0) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -183,23 +212,10 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
                       return;
                     }
 
-                    //Call API here
-                    mockBudgetsJuly.add(
-                      Budget(
-                        budgetId: mockBudgetsJuly.length, 
-                        userId: 101, 
-                        categoryId: selectedValue!.categoryId, 
-                        categoryName: selectedValue!.categoryName, 
-                        iconCode: 12312,
-                        amount: amt, 
-                        spentAmount: 100, 
-                        month: selectedMonth.month, 
-                        year: selectedMonth.year
-                      )
-                    );
+                    String result = await budgetService.addBudget(3, selectedValue!.categoryId, amt, selectedMonth!.month, selectedMonth!.year);
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Budget saved!")),
+                      SnackBar(content: Text(result)),
                     );
                     Navigator.pop(context, true);
                   },

@@ -138,11 +138,11 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                 onPressed: () {
                   Navigator.push(
                     context, 
-                    MaterialPageRoute(builder: (context) => AddBudgetScreen())
+                    MaterialPageRoute(builder: (context) => AddBudgetScreen(selectedMonthFromPlanningScreen: pickedDate,))
                   ).then((result){
                     if(result == true){
                       setState(() {
-                        
+                        _loadInitialBudgets();
                       });
                     }
                   });
@@ -277,11 +277,11 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
             onPressed: () {
               Navigator.push(
                 context, 
-                MaterialPageRoute(builder: (context) => AddBudgetScreen())
+                MaterialPageRoute(builder: (context) => AddBudgetScreen(selectedMonthFromPlanningScreen: pickedDate,))
               ).then((result){
                 if(result == true){
                   setState(() {
-                    
+                    _loadInitialBudgets();
                   });
                 }
               });
