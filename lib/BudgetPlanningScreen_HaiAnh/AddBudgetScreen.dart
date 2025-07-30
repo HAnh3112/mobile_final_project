@@ -1,7 +1,5 @@
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/service/budget_service.dart';
 import 'package:final_project/model/AvailableCategory.dart';
-import 'package:final_project/model/Budget.dart';
-import 'package:final_project/testData/TestDataBudget.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -45,6 +43,7 @@ class AddBudgetScreenBody extends StatefulWidget {
 }
 
 class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
+  int userID = 3;
   List<AvailableCategory> categoryList = [];
   AvailableCategory? selectedValue;
 
@@ -55,7 +54,7 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
   final DateFormat monthFormat = DateFormat('MM/yyyy');
 
   void _fetchAvailableCategory() async{
-    final result = await budgetService.getAvailavleCategory(3, selectedMonth!.month, selectedMonth!.year);
+    final result = await budgetService.getAvailavleCategory(userID, selectedMonth!.month, selectedMonth!.year);
     setState(() {
       categoryList = result;
     });
@@ -76,7 +75,7 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -212,7 +211,7 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
                       return;
                     }
 
-                    String result = await budgetService.addBudget(3, selectedValue!.categoryId, amt, selectedMonth!.month, selectedMonth!.year);
+                    String result = await budgetService.addBudget(userID, selectedValue!.categoryId, amt, selectedMonth!.month, selectedMonth!.year);
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(result)),

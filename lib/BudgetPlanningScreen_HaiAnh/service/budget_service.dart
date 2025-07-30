@@ -1,8 +1,7 @@
 import 'dart:convert';
-import 'package:final_project/API%20IP/ip_address.dart';
+import 'package:final_project/global_variable/ip_address.dart';
 import 'package:final_project/model/AvailableCategory.dart';
 import 'package:final_project/model/Budget.dart';
-import 'package:final_project/model/Category.dart';
 import 'package:http/http.dart' as http;
 
 class budget_service{
@@ -100,7 +99,7 @@ class budget_service{
       return ("New budget added successfully!");
     } else {
       print("Failed adding new budget");
-      throw Exception('Failed to update budget');
+      throw Exception('Failed to add new budget');
     }
   }
 }

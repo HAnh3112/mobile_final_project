@@ -1,3 +1,4 @@
+import 'package:final_project/BudgetPlanningScreen_HaiAnh/PrefixScreen.dart';
 import 'package:final_project/model/Budget.dart';
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/service/budget_service.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
@@ -26,6 +27,7 @@ class BudgetPlanningBody extends StatefulWidget {
 
 
 class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
+  int userID = 3;
   int? editingIndex;
   final TextEditingController editingController = TextEditingController();
   final budgetService = budget_service();
@@ -49,7 +51,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
     });
 
     final budgets = await budgetService.getbudgetList(
-      3, // Replace with actual userId if dynamic
+      userID,
       pickedDate.month,
       pickedDate.year,
     );
@@ -73,7 +75,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
       });
 
       final budgets = await budgetService.getbudgetList(
-        3,
+        userID,
         selected.month,
         selected.year,
       );
@@ -150,7 +152,29 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                 style: ElevatedButton.styleFrom(backgroundColor: currentTheme.main_button_color),
                 child: Text("Set New Budget +", style: TextStyle(color: currentTheme.main_button_text_color)),
               ),
-            )
+            ),
+
+            const SizedBox(height: 5,),
+
+            TextButton.icon(
+              onPressed: (){
+                Navigator.push(
+                  context, 
+                  MaterialPageRoute(builder: (builder) => PrefixScreen(pickedDate: pickedDate,))
+                ).then((result) async {
+                  if(result == true){
+                    await Future.delayed(Duration(seconds: 2));
+                    _loadInitialBudgets();
+                  }
+                });
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: currentTheme.sub_button_color,
+                side: BorderSide(color: currentTheme.sub_button_text_color, width: 2),
+              ), 
+              icon: Icon(Icons.build_circle, color: currentTheme.sub_button_text_color,),
+              label: Text("Prefix", style: TextStyle(color: currentTheme.sub_button_text_color),),
+            ),
           ]
         ],
       ),
@@ -188,7 +212,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                       dateFormat.format(pickedDate),
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -270,25 +294,55 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
         ),
 
         //Navigate to adding budget screen
-        Container(
-          width: 400,
-          margin: const EdgeInsets.symmetric(horizontal: 20),
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context, 
-                MaterialPageRoute(builder: (context) => AddBudgetScreen(selectedMonthFromPlanningScreen: pickedDate,))
-              ).then((result){
-                if(result == true){
-                  setState(() {
-                    _loadInitialBudgets();
+        Row(
+          children: [
+            Container(
+              width: 190,
+              margin: const EdgeInsets.fromLTRB(20,0,0,0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(builder: (context) => AddBudgetScreen(selectedMonthFromPlanningScreen: pickedDate,))
+                  ).then((result){
+                    if(result == true){
+                      setState(() {
+                        _loadInitialBudgets();
+                      });
+                    }
                   });
-                }
-              });
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: currentTheme.main_button_color),
-            child: Text("Set new budget +",style: TextStyle(color: currentTheme.main_button_text_color, fontWeight: FontWeight.bold),),
-          ),
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: currentTheme.main_button_color),
+                child: Text("Set new budget +",style: TextStyle(color: currentTheme.main_button_text_color, fontWeight: FontWeight.bold),),
+              ),
+            ),
+
+            const SizedBox(width: 20,),
+
+            Container(
+              width: 190,
+              margin: const EdgeInsets.fromLTRB(0,0,20,0),
+              child: TextButton.icon(
+                onPressed: (){
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(builder: (builder) => PrefixScreen(pickedDate: pickedDate,))
+                  ).then((result) async {
+                    if(result == true){
+                      await Future.delayed(Duration(seconds: 2));
+                      _loadInitialBudgets();
+                    }
+                  });
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: currentTheme.sub_button_color,
+                  side: BorderSide(color: currentTheme.sub_button_text_color, width: 2),
+                ), 
+                icon: Icon(Icons.build_circle, color: currentTheme.sub_button_text_color,),
+                label: Text("Prefix", style: TextStyle(color: currentTheme.sub_button_text_color),),
+              ),
+            )
+          ],
         ),
 
         const SizedBox(height: 10,),
