@@ -157,34 +157,22 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                   runSpacing: 8,
                   children: commonIcons.map((icon) {
                     final isSelected = _selectedIcon == icon;
-                    final isUsedByOther = _categories.any(
-                      (cat) =>
-                          cat.icon == icon &&
-                          (existing == null || cat.id != existing.id),
-                    );
 
                     return RawChip(
-                      // ĐÃ CHỈNH PHẦN DƯỚI ĐỂ ICON MỜ NẾU ĐÃ DÙNG
-                      label: Opacity(
-                        opacity: isUsedByOther ? 0.3 : 1.0,
-                        child: Icon(
-                          icon,
-                          size: 20,
-                          color: isSelected
-                              ? Colors.white
-                              : theme.main_text_color,
-                        ),
+                      label: Icon(
+                        icon,
+                        size: 20,
+                        color: isSelected
+                            ? Colors.white
+                            : theme.main_text_color,
                       ),
                       selected: isSelected,
-                      onSelected: isUsedByOther
-                          ? null
-                          : (_) {
-                              setStateDialog(() => _selectedIcon = icon);
-                            },
+                      onSelected: (_) {
+                        setStateDialog(() => _selectedIcon = icon);
+                      },
                       selectedColor: Colors.lightBlueAccent,
                       backgroundColor: theme.background_color,
-                      disabledColor: Colors.grey[300],
-                      showCheckmark: false, // Không có dấu ✔
+                      showCheckmark: false,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -250,17 +238,12 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                       cat.name.toLowerCase() == name.toLowerCase() &&
                       (existing == null || cat.id != existing.id),
                 );
-                final iconExists = _categories.any(
-                  (cat) =>
-                      cat.icon == _selectedIcon &&
-                      (existing == null || cat.id != existing.id),
-                );
 
-                if (nameExists || iconExists) {
+                if (nameExists) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'Name or icon already exists',
+                        'Name already exists',
                         style: TextStyle(color: theme.main_text_color),
                       ),
                       backgroundColor: theme.background_color,

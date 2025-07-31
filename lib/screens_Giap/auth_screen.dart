@@ -36,7 +36,7 @@ class _AuthScreenState extends State<AuthScreen>
     _loginEmailController.dispose();
     _loginPasswordController.dispose();
 
-    _signupUsernameController.dispose(); // 👈 THÊM
+    _signupUsernameController.dispose();
     _signupEmailController.dispose();
     _signupPasswordController.dispose();
     _signupConfirmPasswordController.dispose();
@@ -225,7 +225,7 @@ class _AuthScreenState extends State<AuthScreen>
       controller: controller,
       validator: (value) {
         if (value == null || value.isEmpty) return 'Email is required';
-        if (!RegExp(r'^[^@]+@gmail\.com$').hasMatch(value))
+        if (!RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$').hasMatch(value))
           return 'Enter a valid email';
         return null;
       },
