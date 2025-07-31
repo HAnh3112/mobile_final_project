@@ -1,34 +1,10 @@
+import 'package:final_project/DataConverter.dart';
+import 'package:final_project/screens_Giap/service/category_service.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../ThemeChanging_HaiAnh/current_theme.dart';
-import '../testData/TestDataCategory.dart'; // ✅ ĐÃ THÊM: Import mock data
 import '../model/Category.dart'; // nếu dùng model từ đây
 
-class Category {
-  final String id;
-  final String name;
-  final IconData icon;
-  final Color color;
-  final String type; // Income hoặc Expense
-
-  Category({
-    required this.id,
-    required this.name,
-    required this.icon,
-    required this.color,
-    required this.type,
-  });
-
-  Category copyWith({String? name, IconData? icon, Color? color}) {
-    return Category(
-      id: id,
-      name: name ?? this.name,
-      icon: icon ?? this.icon,
-      color: color ?? this.color,
-      type: type, // không cho sửa type
-    );
-  }
-}
 
 class CategoryManagementScreen extends StatefulWidget {
   const CategoryManagementScreen({super.key});
@@ -39,12 +15,16 @@ class CategoryManagementScreen extends StatefulWidget {
 }
 
 class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
-  final List<Category> _categories = [];
+  final int userID = 1;
+  List<Category> _categories = [];
+  final category_service categoryService = category_service();
   final TextEditingController _nameController = TextEditingController();
+  final Dataconverter converter = Dataconverter();
 
   IconData? _selectedIcon;
   Color _selectedColor = const Color(0xFFFF6B6B);
   String? _selectedType;
+  int? selectedCategory;
 
   final List<IconData> commonIcons = [
     Icons.fastfood,
@@ -72,28 +52,35 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     Color(0xFF98D8C8),
   ];
 
+  void _fetchCategories() async {
+    final result = await categoryService.getCategoriesList(userID);
+    setState(() {
+      _categories = result;
+    });
+  }
+
+  Future<String> _fetchAddCategory(String name, String type, int iconCode, String colorCode) async{
+    String result = await categoryService.addCategory(userID, name, type, iconCode, colorCode);
+    return result;
+  }
+
+  Future<String> _fetchUpdateCategory(int id, String name, int iconCode, String colorCode) async {
+    String result = await categoryService.editCategory(id, name, iconCode, colorCode);
+    return result;
+  }
+
+  Future<String> _fetchDeleteCategory(int id) async {
+    String result = await categoryService.deleteCategory(id);
+    return result;
+  }
+
   @override
   void initState() {
     super.initState();
-
+    _fetchCategories();
     //THÊM: Load dữ liệu mock từ mockCategory vào danh sách _categories
-    _categories.addAll(
-      mockCategory.map(
-        (cat) => Category(
-          id: cat.categoryId.toString(),
-          name: cat.categoryName,
-          icon: IconData(cat.iconCode, fontFamily: 'MaterialIcons'),
-          color: _parseColor(cat.colorCode),
-          type: cat.type ?? 'Expense',
-        ),
-      ),
-    );
   }
 
-  // THÊM: Hàm chuyển String "#RRGGBB" sang Color
-  Color _parseColor(String colorCode) {
-    return Color(int.parse(colorCode.replaceFirst('#', '0xff')));
-  }
 
   void _showCategoryDialog({Category? existing}) {
     final theme = currentTheme;
@@ -250,7 +237,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.main_button_color,
               ),
-              onPressed: () {
+              onPressed: () async {
                 final name = _nameController.text.trim();
                 if (name.isEmpty ||
                     _selectedIcon == null ||
@@ -278,26 +265,35 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                 }
 
                 if (existing != null) {
-                  final updated = existing.copyWith(
-                    name: name,
-                    icon: _selectedIcon!,
-                    color: _selectedColor,
-                  );
+                  final result = await _fetchUpdateCategory(selectedCategory!, name, 
+                                _selectedIcon!.codePoint, converter.colorToHex(_selectedColor));
                   setState(() {
-                    final index = _categories.indexWhere(
-                      (c) => c.id == existing.id,
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          result.toString(),
+                          style: TextStyle(color: theme.main_text_color),
+                        ),
+                        backgroundColor: theme.background_color,
+                      ),
                     );
-                    _categories[index] = updated;
+                    _fetchCategories();
                   });
                 } else {
-                  final newCategory = Category(
-                    id: const Uuid().v4(),
-                    name: name,
-                    icon: _selectedIcon!,
-                    color: _selectedColor,
-                    type: _selectedType!,
-                  );
-                  setState(() => _categories.add(newCategory));
+                  final result = await _fetchAddCategory(name, _selectedType!, 
+                                _selectedIcon!.codePoint, converter.colorToHex(_selectedColor));
+                  setState(() {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          result.toString(),
+                          style: TextStyle(color: theme.main_text_color),
+                        ),
+                        backgroundColor: theme.background_color,
+                      ),
+                    );
+                    _fetchCategories();
+                  });
                 }
 
                 Navigator.pop(context);
@@ -313,9 +309,6 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     );
   }
 
-  void _deleteCategory(String id) {
-    setState(() => _categories.removeWhere((cat) => cat.id == id));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -375,7 +368,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: category.color,
-                      child: Icon(category.icon, color: Colors.white, size: 20),
+                      child: Icon(category.icon, color: currentTheme.sub_button_color, size: 20),
                     ),
                     title: Text(
                       category.name,
@@ -393,15 +386,22 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                             Icons.edit,
                             color: theme.main_button_color,
                           ),
-                          onPressed: () =>
-                              _showCategoryDialog(existing: category),
+                          onPressed: () {
+                              selectedCategory = int.parse(_categories[index].id);
+                              _showCategoryDialog(existing: category);
+                          }
                         ),
                         IconButton(
                           icon: Icon(
                             Icons.delete,
                             color: theme.main_button_color.withOpacity(0.7),
                           ),
-                          onPressed: () => _deleteCategory(category.id),
+                          onPressed: () async {
+                            final result = await _fetchDeleteCategory(int.parse(_categories[index].id));
+                            setState(() {
+                              _categories.removeAt(index);
+                            });
+                          },
                         ),
                       ],
                     ),
