@@ -1,6 +1,8 @@
-import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import '../ThemeChanging_HaiAnh/current_theme.dart';
+import '../testData/TestDataCategory.dart'; // ✅ ĐÃ THÊM: Import mock data
+import '../model/Category.dart'; // nếu dùng model từ đây
 
 class Category {
   final String id;
@@ -69,6 +71,29 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     Color(0xFFFFB6C1),
     Color(0xFF98D8C8),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    //THÊM: Load dữ liệu mock từ mockCategory vào danh sách _categories
+    _categories.addAll(
+      mockCategory.map(
+        (cat) => Category(
+          id: cat.categoryId.toString(),
+          name: cat.categoryName,
+          icon: IconData(cat.iconCode, fontFamily: 'MaterialIcons'),
+          color: _parseColor(cat.colorCode),
+          type: cat.type ?? 'Expense',
+        ),
+      ),
+    );
+  }
+
+  // THÊM: Hàm chuyển String "#RRGGBB" sang Color
+  Color _parseColor(String colorCode) {
+    return Color(int.parse(colorCode.replaceFirst('#', '0xff')));
+  }
 
   void _showCategoryDialog({Category? existing}) {
     final theme = currentTheme;
