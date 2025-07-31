@@ -171,14 +171,14 @@ class _AuthScreenState extends State<AuthScreen>
       child: Column(
         children: [
           buildUsernameInput(controller: _signupUsernameController), // 👈 THÊM
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           buildEmailInput(controller: _signupEmailController),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           buildPasswordInput(
             controller: _signupPasswordController,
             label: "Password",
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           buildPasswordInput(
             controller: _signupConfirmPasswordController,
             label: "Confirm Password",
@@ -190,7 +190,7 @@ class _AuthScreenState extends State<AuthScreen>
               return null;
             },
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
           ElevatedButton(
             onPressed: () {
               if (_signupFormKey.currentState!.validate()) {
