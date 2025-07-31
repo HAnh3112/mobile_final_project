@@ -1,7 +1,9 @@
+import 'package:final_project/DataConverter.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:final_project/DoanAnhVu/transaction_history_screen.dart'; // Import Transaction model
+import 'package:final_project/DoanAnhVu/model/Transaction.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final bool? showTabbar;
@@ -17,6 +19,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final TextEditingController _notesController = TextEditingController();
   String? _selectedCategory;
   DateTime _selectedDate = DateTime.now();
+  final Dataconverter dtc = Dataconverter();
   final _formKey = GlobalKey<FormState>();
 
   final List<String> _categories = [
@@ -354,12 +357,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   : 'No note',
               amount: double.parse(_amountController.text),
               date: _selectedDate,
-              icon: _isIncome ? Icons.attach_money : Icons.shopping_cart,
-              iconColor: _isIncome ? Colors.green : Colors.red,
+              icon: _isIncome ? Icons.attach_money.codePoint : Icons.shopping_cart.codePoint,
+              iconColor: _isIncome ? dtc.colorToHex(Colors.green) : dtc.colorToHex(Colors.red),
               isIncome: _isIncome,
             );
-
-            Navigator.pop(context, newTransaction);
+            ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("sucess")),
+                      );
+            Navigator.push(context
+            , MaterialPageRoute(builder: (builder) => TransactionHistoryScreen(showAppBar: true,)));
           }
         },
         style: ElevatedButton.styleFrom(
