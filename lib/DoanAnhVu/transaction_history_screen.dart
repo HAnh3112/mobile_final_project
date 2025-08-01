@@ -62,7 +62,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     try {
       final fetchedTransactions = await _transactionService
           .getUserTransactionHistory(_currentUserId);
-      setState(() {
+      setState((
+      ) {
         _allTransactions = fetchedTransactions;
         isLoading = false;
         _applyFilters(); // Áp dụng bộ lọc ngay sau khi tải dữ liệu

@@ -1,5 +1,7 @@
 // lib/dashboard_screen.dart
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/BudgetPlanning.dart';
+import 'package:final_project/DoanAnhVu/DTO/TransactionSummary.dart';
+import 'package:final_project/DoanAnhVu/services/transaction_service.dart';
 import 'package:final_project/DoanAnhVu/transaction_history_screen.dart';
 import 'package:final_project/QuynhAnh_screens/ExpenseBreakdownScreen.dart';
 import 'package:final_project/QuynhAnh_screens/add_transaction_screen.dart';
@@ -17,10 +19,26 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0; // To keep track of the selected tab
+  final TransactionService rht = TransactionService();
+  List<TransactionSummary> ltht = [];
+  int userId = 1;
+  void _viewRecentTransactionHistory() async {
+    final results = await rht.getUserRecentHistory(userId);
+    setState(() {
+      ltht = results;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _viewRecentTransactionHistory();
+  }
 
   // List of screens to navigate to
   List<Widget> _widgetOptions() => [
-    _DashboardContent(),
+    _DashboardContent(userId: userId, ltht: ltht,),
     TransactionHistoryScreen(),
     AddTransactionScreen(),
     BudgetPlanning(),
@@ -33,14 +51,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-  String titleName(index){
-    switch(index){
-      case 0: return "Dashboard";
-      case 1: return "Transaction\nHistory";
-      case 2: return "Add Transaction";
-      case 3: return "Budget Planning";
-      case 4: return "Categories";
-      default: return "Unknown";
+  String titleName(index) {
+    switch (index) {
+      case 0:
+        return "Dashboard";
+      case 1:
+        return "Transaction\nHistory";
+      case 2:
+        return "Add Transaction";
+      case 3:
+        return "Budget Planning";
+      case 4:
+        return "Categories";
+      default:
+        return "Unknown";
     }
   }
 
@@ -124,8 +148,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           final SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.clear(); // This removes all keys and values
           Navigator.pushAndRemoveUntil(
-            context, MaterialPageRoute(builder: (builder) => AuthScreen()),
-            (Route<dynamic> route) => false
+            context,
+            MaterialPageRoute(builder: (builder) => AuthScreen()),
+            (Route<dynamic> route) => false,
           ); // This will pop the current route (DashboardScreen)
         }
       },
@@ -138,7 +163,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               Icon(Icons.logout, color: Colors.red),
               SizedBox(width: 8),
-              Text("Sign Out", style: TextStyle(color: currentTheme.main_text_color),),
+              Text(
+                "Sign Out",
+                style: TextStyle(color: currentTheme.main_text_color),
+              ),
             ],
           ),
         ),
@@ -147,10 +175,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
+class _DashboardContent extends StatefulWidget {
+  int? userId;
+  List<TransactionSummary>? ltht;
+
+  _DashboardContent({super.key, required this.userId, required this.ltht});
+
+  @override
+  State<StatefulWidget> createState() => __DashboardContentState();
+}
+
 // Extract your original dashboard body into a separate widget
-class _DashboardContent extends StatelessWidget {
-  const _DashboardContent({Key? key})
-    : super(key: key); // Add a constructor for best practice
+class __DashboardContentState extends State<_DashboardContent> {
+  
 
   @override
   Widget build(BuildContext context) {
@@ -355,7 +392,8 @@ class _DashboardContent extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => TransactionHistoryScreen(showAppBar: true,),
+                      builder: (context) =>
+                          TransactionHistoryScreen(showAppBar: true),
                     ),
                   );
                 },
@@ -367,8 +405,9 @@ class _DashboardContent extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          _buildTransactionItem('Food', '2025-07-21', '-\$20', false),
-          _buildTransactionItem('Salary', '2025-07-20', '+\$500', true),
+          ...widget.ltht!.map((rt) => (
+            _buildTransactionItem(rt.categoryName, rt.transactionDate.toString(), rt.amount.toString(), (rt.categoryType == "Income")? true:false)
+          )).toList()
         ],
       ),
     );
