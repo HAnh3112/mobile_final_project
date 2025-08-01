@@ -2,24 +2,49 @@ import 'package:final_project/BudgetPlanningScreen_HaiAnh/AddPrefixScreen.dart';
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/service/prefix_service.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:final_project/model/Prefix.dart';
+import 'package:final_project/model/User.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class PrefixScreen extends StatelessWidget {
-  int userID = 3;
+class PrefixScreen extends StatefulWidget{
   final DateTime pickedDate;
 
-  PrefixScreen({super.key, required this.pickedDate});
+  const PrefixScreen({super.key, required this.pickedDate});
+
+  @override
+  State<StatefulWidget> createState() => _PrefixScreenState();
+}
+
+class _PrefixScreenState extends State<PrefixScreen> {
+  int? userID;
+
+  void _loadUserID() async {
+    int? id = await User.getStoredUserId();
+    setState(() {
+      userID = id;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserID();
+  }
 
   final prefix_service prefixService = prefix_service();
 
   Future<void> _fetchApplyPrefix() async {
-    prefixService.applyPrefix(userID, pickedDate.month, pickedDate.year);
+    prefixService.applyPrefix(userID!, widget.pickedDate.month, widget.pickedDate.year);
   }
 
   @override
   Widget build(BuildContext context) {
-    print(pickedDate);
+    print(widget.pickedDate);
+    if (userID == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       backgroundColor: currentTheme.background_color,
       appBar: AppBar(
@@ -89,29 +114,29 @@ class PrefixScreen extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
       ),
-      body: PrefixScreenBody(pickedDate: pickedDate,),
+      body: PrefixScreenBody(pickedDate: widget.pickedDate, userID: userID!,),
     );
   }
 }
 
 class PrefixScreenBody extends StatefulWidget{
   final DateTime pickedDate;
+  final int userID;
 
-  const PrefixScreenBody({super.key, required this.pickedDate});
+  const PrefixScreenBody({super.key, required this.pickedDate, required this.userID});
 
   @override
   State<StatefulWidget> createState() => _PrefixScreenBodyState();
 }
 
 class _PrefixScreenBodyState extends State<PrefixScreenBody>{
-  int userID = 3;
   final prefix_service prefixService = prefix_service();
   final DateFormat dateFormat = DateFormat("MM/yyyy");
 
   List<Prefix> allPrefix = [];
 
   void _fetchUserPrefixes() async {
-    final result = await prefixService.getPrefixList(userID);
+    final result = await prefixService.getPrefixList(widget.userID);
     setState(() {
       allPrefix = result;
     });

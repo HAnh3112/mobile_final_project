@@ -1,14 +1,26 @@
+import 'package:shared_preferences/shared_preferences.dart';
+
 class User {
   final int id;
   final String email;
   final String username;
-  final String password;  //this will not be included when use with real data
 
   User({
     required this.id,
     required this.email,
     required this.username,
-    required this.password  //this will not be included when use with real data
   });
 
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'],
+      username: json['username'],
+      email: json['email'],
+    );
+  }
+
+  static Future<int?> getStoredUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('userID');
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/service/budget_service.dart';
 import 'package:final_project/model/AvailableCategory.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
+import 'package:final_project/model/User.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
@@ -43,7 +44,7 @@ class AddBudgetScreenBody extends StatefulWidget {
 }
 
 class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
-  int userID = 3;
+  int? userID;
   List<AvailableCategory> categoryList = [];
   AvailableCategory? selectedValue;
 
@@ -54,7 +55,8 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
   final DateFormat monthFormat = DateFormat('MM/yyyy');
 
   void _fetchAvailableCategory() async{
-    final result = await budgetService.getAvailavleCategory(userID, selectedMonth!.month, selectedMonth!.year);
+    userID = await User.getStoredUserId();
+    final result = await budgetService.getAvailavleCategory(userID!, selectedMonth!.month, selectedMonth!.year);
     setState(() {
       categoryList = result;
     });
@@ -211,7 +213,7 @@ class _AddBudgetScreenBodyState extends State<AddBudgetScreenBody> {
                       return;
                     }
 
-                    String result = await budgetService.addBudget(userID, selectedValue!.categoryId, amt, selectedMonth!.month, selectedMonth!.year);
+                    String result = await budgetService.addBudget(userID!, selectedValue!.categoryId, amt, selectedMonth!.month, selectedMonth!.year);
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text(result)),

@@ -1,6 +1,7 @@
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/service/prefix_service.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:final_project/model/AvailableCategory.dart';
+import 'package:final_project/model/User.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -10,7 +11,7 @@ class AddPrefixScreen extends StatefulWidget{
 }
 
 class _AddPrefixScreenState extends State<AddPrefixScreen>{
-  int userID = 3;
+  int? userID;
   final TextEditingController _amountController = TextEditingController();
   final prefix_service prefixService = prefix_service();
 
@@ -18,7 +19,8 @@ class _AddPrefixScreenState extends State<AddPrefixScreen>{
   AvailableCategory? selectedValue;
 
   void _fetchAvailableCategory() async {
-    final result = await prefixService.getAvailableCategory(userID);
+    userID = await User.getStoredUserId();
+    final result = await prefixService.getAvailableCategory(userID!);
     setState(() {
       categoryList = result;
     });
@@ -150,7 +152,7 @@ class _AddPrefixScreenState extends State<AddPrefixScreen>{
                         return;
                       }
 
-                      String result = await prefixService.addPrefix(userID, selectedValue!.categoryId, amt);
+                      String result = await prefixService.addPrefix(userID!, selectedValue!.categoryId, amt);
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(result)),

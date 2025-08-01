@@ -8,6 +8,7 @@ import 'package:final_project/screens_Giap/category_management_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/theme.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends StatefulWidget {
   @override
@@ -117,9 +118,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildSettingsMenu() {
     return PopupMenuButton<String>(
       icon: Icon(Icons.settings, color: currentTheme.sub_text_color, size: 28),
-      onSelected: (value) {
+      onSelected: (value) async {
         if (value == 'signout') {
           // You might want to navigate to a login screen or perform actual sign-out logic here
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.clear(); // This removes all keys and values
           Navigator.pushAndRemoveUntil(
             context, MaterialPageRoute(builder: (builder) => AuthScreen()),
             (Route<dynamic> route) => false
