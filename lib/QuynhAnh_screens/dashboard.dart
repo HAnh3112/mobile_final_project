@@ -36,7 +36,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String titleName(index){
     switch(index){
       case 0: return "Dashboard";
-      case 1: return "Transaction History";
+      case 1: return "Transaction\nHistory";
       case 2: return "Add Transaction";
       case 3: return "Budget Planning";
       case 4: return "Categories";

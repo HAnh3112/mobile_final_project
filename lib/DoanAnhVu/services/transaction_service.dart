@@ -1,5 +1,6 @@
 // lib/services/transaction_service.dart
 import 'dart:convert';
+import 'package:final_project/DoanAnhVu/model/transaction.dart';
 import 'package:http/http.dart' as http;
 import 'package:final_project/DoanAnhVu/DTO/TransactionHistoryDTO.dart'; // Đảm bảo đường dẫn đúng
 import 'package:final_project/global_variable/ip_address.dart';

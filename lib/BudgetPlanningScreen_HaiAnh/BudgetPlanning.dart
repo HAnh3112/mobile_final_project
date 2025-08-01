@@ -298,55 +298,56 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
         ),
 
         //Navigate to adding budget screen
-        Row(
-          children: [
-            Container(
-              width: 190,
-              margin: const EdgeInsets.fromLTRB(20,0,0,0),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (context) => AddBudgetScreen(selectedMonthFromPlanningScreen: pickedDate,))
-                  ).then((result){
-                    if(result == true){
-                      setState(() {
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 5,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context, 
+                      MaterialPageRoute(builder: (context) => AddBudgetScreen(selectedMonthFromPlanningScreen: pickedDate,))
+                    ).then((result){
+                      if(result == true){
+                        setState(() {
+                          _loadInitialBudgets();
+                        });
+                      }
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: currentTheme.main_button_color),
+                  child: Text("Set new budget +",style: TextStyle(color: currentTheme.main_button_text_color, fontWeight: FontWeight.bold),),
+                ),
+              ),
+          
+              Expanded(flex: 1, child: SizedBox(),),
+          
+              Expanded(
+                flex: 5,
+                child: TextButton.icon(
+                  onPressed: (){
+                    Navigator.push(
+                      context, 
+                      MaterialPageRoute(builder: (builder) => PrefixScreen(pickedDate: pickedDate,))
+                    ).then((result) async {
+                      if(result == true){
+                        await Future.delayed(Duration(seconds: 2));
                         _loadInitialBudgets();
-                      });
-                    }
-                  });
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: currentTheme.main_button_color),
-                child: Text("Set new budget +",style: TextStyle(color: currentTheme.main_button_text_color, fontWeight: FontWeight.bold),),
-              ),
-            ),
-
-            const SizedBox(width: 20,),
-
-            Container(
-              width: 190,
-              margin: const EdgeInsets.fromLTRB(0,0,20,0),
-              child: TextButton.icon(
-                onPressed: (){
-                  Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (builder) => PrefixScreen(pickedDate: pickedDate,))
-                  ).then((result) async {
-                    if(result == true){
-                      await Future.delayed(Duration(seconds: 2));
-                      _loadInitialBudgets();
-                    }
-                  });
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: currentTheme.sub_button_color,
-                  side: BorderSide(color: currentTheme.sub_button_text_color, width: 2),
-                ), 
-                icon: Icon(Icons.build_circle, color: currentTheme.sub_button_text_color,),
-                label: Text("Prefix", style: TextStyle(color: currentTheme.sub_button_text_color),),
-              ),
-            )
-          ],
+                      }
+                    });
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: currentTheme.sub_button_color,
+                    side: BorderSide(color: currentTheme.sub_button_text_color, width: 2),
+                  ), 
+                  icon: Icon(Icons.build_circle, color: currentTheme.sub_button_text_color,),
+                  label: Text("Prefix", style: TextStyle(color: currentTheme.sub_button_text_color),),
+                ),
+              )
+            ],
+          ),
         ),
 
         const SizedBox(height: 10,),

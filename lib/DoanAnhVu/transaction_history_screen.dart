@@ -233,14 +233,15 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               ),
               backgroundColor: currentTheme.background_color,
               elevation: 0,
-              title: Text(
-                "Transaction History",
-                style: TextStyle(
-                  color: currentTheme.main_text_color,
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              title: 
+                  Text(
+                    "Transaction\nHistory",
+                    style: TextStyle(
+                      color: currentTheme.main_text_color,
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
               actions: [
                 IconButton(
                   icon: Icon(

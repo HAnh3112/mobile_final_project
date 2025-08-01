@@ -29,8 +29,16 @@ class _AuthScreenState extends State<AuthScreen>
 
   @override
   void initState() {
-    _tabController = TabController(length: 2, vsync: this);
     super.initState();
+
+    _tabController = TabController(length: 2, vsync: this);
+
+    _clearPrefs();
+  }
+
+  void _clearPrefs() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
   }
 
   @override
@@ -62,18 +70,27 @@ class _AuthScreenState extends State<AuthScreen>
           child: SingleChildScrollView(
             child: Column(
               children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.account_balance_wallet,
-                    size: 32,
-                    color: Colors.white,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.account_balance_wallet,
+                        size: 32,
+                        color: Colors.white,
+                      ),
+                    ),
+
+                    const SizedBox(width: 20,),
+
+                    Text("FinGuard",style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold, fontSize: 40),)
+                  ],
                 ),
                 const SizedBox(height: 24),
                 Container(
@@ -138,6 +155,7 @@ class _AuthScreenState extends State<AuthScreen>
       key: _loginFormKey,
       child: Column(
         children: [
+          const SizedBox(height: 10,),
           buildEmailInput(controller: _loginEmailController),
           const SizedBox(height: 16),
           buildPasswordInput(controller: _loginPasswordController),
@@ -186,15 +204,16 @@ class _AuthScreenState extends State<AuthScreen>
       key: _signupFormKey,
       child: Column(
         children: [
+          const SizedBox(height: 6),
           buildUsernameInput(controller: _signupUsernameController), // 👈 THÊM
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           buildEmailInput(controller: _signupEmailController),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           buildPasswordInput(
             controller: _signupPasswordController,
             label: "Password",
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           buildPasswordInput(
             controller: _signupConfirmPasswordController,
             label: "Confirm Password",
@@ -206,7 +225,7 @@ class _AuthScreenState extends State<AuthScreen>
               return null;
             },
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () async {
               if (_signupFormKey.currentState!.validate()) {

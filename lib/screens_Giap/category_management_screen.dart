@@ -396,6 +396,13 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                             final result = await _fetchDeleteCategory(int.parse(_categories[index].id));
                             setState(() {
                               _categories.removeAt(index);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    result.toString(),
+                                  ),
+                                ),
+                              );
                             });
                           },
                         ),
