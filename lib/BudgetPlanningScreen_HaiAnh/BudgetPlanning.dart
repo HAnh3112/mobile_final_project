@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'AddBudgetScreen.dart';
+import 'package:final_project/model/User.dart';
 
 class BudgetPlanning extends StatelessWidget {
   @override
@@ -27,7 +28,7 @@ class BudgetPlanningBody extends StatefulWidget {
 
 
 class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
-  int userID = 3;
+  int? userID;
   int? editingIndex;
   final TextEditingController editingController = TextEditingController();
   final budgetService = budget_service();
@@ -50,8 +51,11 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
       isLoading = true;
     });
 
+    userID = await User.getStoredUserId();
+    print("Loaded userId: $userID");
+
     final budgets = await budgetService.getbudgetList(
-      userID,
+      userID!,
       pickedDate.month,
       pickedDate.year,
     );
@@ -75,7 +79,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
       });
 
       final budgets = await budgetService.getbudgetList(
-        userID,
+        userID!,
         selected.month,
         selected.year,
       );

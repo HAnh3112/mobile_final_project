@@ -1,5 +1,7 @@
 import 'package:final_project/QuynhAnh_screens/dashboard.dart';
+import 'package:final_project/screens_Giap/service/login_service.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -10,6 +12,7 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen>
     with SingleTickerProviderStateMixin {
+  final login_service loginService = login_service();
   late TabController _tabController;
   bool _showPassword = false;
 
@@ -140,8 +143,21 @@ class _AuthScreenState extends State<AuthScreen>
           buildPasswordInput(controller: _loginPasswordController),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (_loginFormKey.currentState!.validate()) {
+                final result = await loginService.login(_loginEmailController.text, _loginPasswordController.text);
+                if(result == null){
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Wrong email or password'),),
+                  );
+                  return;
+                }
+                //Save to share_preference
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setInt('userID', result.id);
+                await prefs.setString('email', result.email);
+                await prefs.setString('username', result.username);
+                
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => DashboardScreen()),
@@ -192,15 +208,29 @@ class _AuthScreenState extends State<AuthScreen>
           ),
           const SizedBox(height: 18),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (_signupFormKey.currentState!.validate()) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      "Account created for ${_signupUsernameController.text}!",
-                    ),
-                  ),
-                );
+                try {
+                  final user = await loginService.register(_signupEmailController.text,
+                     _signupUsernameController.text, _signupConfirmPasswordController.text);
+                  if (user != null) {
+                    // Navigate or show success
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Register successfully! Please log in again")),
+                    );
+
+                    Future.delayed(const Duration(seconds: 1), () {
+                      if (context.mounted) {
+                        _tabController.animateTo(0);
+                      }
+                    });
+                  }
+                } catch (e) {
+                  // Show snackbar, dialog, etc.
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+                  );
+                }
               }
             },
             style: ElevatedButton.styleFrom(

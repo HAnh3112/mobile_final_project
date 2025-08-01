@@ -1,4 +1,5 @@
 import 'package:final_project/DataConverter.dart';
+import 'package:final_project/model/User.dart';
 import 'package:final_project/screens_Giap/service/category_service.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -15,7 +16,7 @@ class CategoryManagementScreen extends StatefulWidget {
 }
 
 class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
-  final int userID = 1;
+  int? userID;
   List<Category> _categories = [];
   final category_service categoryService = category_service();
   final TextEditingController _nameController = TextEditingController();
@@ -53,14 +54,15 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
   ];
 
   void _fetchCategories() async {
-    final result = await categoryService.getCategoriesList(userID);
+    userID = await User.getStoredUserId();
+    final result = await categoryService.getCategoriesList(userID!);
     setState(() {
       _categories = result;
     });
   }
 
   Future<String> _fetchAddCategory(String name, String type, int iconCode, String colorCode) async{
-    String result = await categoryService.addCategory(userID, name, type, iconCode, colorCode);
+    String result = await categoryService.addCategory(userID!, name, type, iconCode, colorCode);
     return result;
   }
 
@@ -256,9 +258,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                     SnackBar(
                       content: Text(
                         'Name already exists',
-                        style: TextStyle(color: theme.main_text_color),
                       ),
-                      backgroundColor: theme.background_color,
                     ),
                   );
                   return;
@@ -272,9 +272,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                       SnackBar(
                         content: Text(
                           result.toString(),
-                          style: TextStyle(color: theme.main_text_color),
                         ),
-                        backgroundColor: theme.background_color,
                       ),
                     );
                     _fetchCategories();
@@ -287,9 +285,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                       SnackBar(
                         content: Text(
                           result.toString(),
-                          style: TextStyle(color: theme.main_text_color),
                         ),
-                        backgroundColor: theme.background_color,
                       ),
                     );
                     _fetchCategories();
