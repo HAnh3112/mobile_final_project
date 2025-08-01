@@ -4,8 +4,7 @@ import 'package:final_project/screens_Giap/service/category_service.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../ThemeChanging_HaiAnh/current_theme.dart';
-import '../model/Category.dart'; // nếu dùng model từ đây
-
+import '../model/Category.dart';
 
 class CategoryManagementScreen extends StatefulWidget {
   const CategoryManagementScreen({super.key});
@@ -61,13 +60,34 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     });
   }
 
-  Future<String> _fetchAddCategory(String name, String type, int iconCode, String colorCode) async{
-    String result = await categoryService.addCategory(userID!, name, type, iconCode, colorCode);
+  Future<String> _fetchAddCategory(
+    String name,
+    String type,
+    int iconCode,
+    String colorCode,
+  ) async {
+    String result = await categoryService.addCategory(
+      userID!,
+      name,
+      type,
+      iconCode,
+      colorCode,
+    );
     return result;
   }
 
-  Future<String> _fetchUpdateCategory(int id, String name, int iconCode, String colorCode) async {
-    String result = await categoryService.editCategory(id, name, iconCode, colorCode);
+  Future<String> _fetchUpdateCategory(
+    int id,
+    String name,
+    int iconCode,
+    String colorCode,
+  ) async {
+    String result = await categoryService.editCategory(
+      id,
+      name,
+      iconCode,
+      colorCode,
+    );
     return result;
   }
 
@@ -80,12 +100,13 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
   void initState() {
     super.initState();
     _fetchCategories();
-    //THÊM: Load dữ liệu mock từ mockCategory vào danh sách _categories
   }
-
 
   void _showCategoryDialog({Category? existing}) {
     final theme = currentTheme;
+    final _formKey = GlobalKey<FormState>();
+    bool _showIconError = false;
+    bool _showTypeError = false;
 
     _nameController.text = existing?.name ?? '';
     _selectedIcon = existing?.icon;
@@ -102,129 +123,163 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
             style: TextStyle(color: Colors.black),
           ),
           content: SingleChildScrollView(
-            child: Column(
-              children: [
-                if (existing == null)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Category Type",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      Row(
-                        children: ["Income", "Expense"].map((type) {
-                          return Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Radio<String>(
-                                value: type,
-                                groupValue: _selectedType,
-                                onChanged: (value) {
-                                  setStateDialog(() => _selectedType = value);
-                                },
-                              ),
-                              Text(type),
-                            ],
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  )
-                else
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text(
-                        "Type: ${existing.type}",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                TextField(
-                  controller: _nameController,
-                  style: TextStyle(color: Colors.black),
-                  decoration: InputDecoration(
-                    labelText: "Category Name",
-                    labelStyle: TextStyle(color: Colors.black),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.black.withOpacity(0.3),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: theme.main_button_color),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Choose Icon",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: commonIcons.map((icon) {
-                    final isSelected = _selectedIcon == icon;
-
-                    return RawChip(
-                      label: Icon(
-                        icon,
-                        size: 20,
-                        color: isSelected
-                            ? Colors.white
-                            : theme.main_text_color,
-                      ),
-                      selected: isSelected,
-                      onSelected: (_) {
-                        setStateDialog(() => _selectedIcon = icon);
-                      },
-                      selectedColor: Colors.lightBlueAccent,
-                      backgroundColor: theme.background_color,
-                      showCheckmark: false,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Choose Color",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: commonColors.map((color) {
-                    return GestureDetector(
-                      onTap: () => setStateDialog(() => _selectedColor = color),
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: _selectedColor == color
-                                ? Colors.black
-                                : Colors.transparent,
-                            width: 2,
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  if (existing == null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Category Type",
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        Row(
+                          children: ["Income", "Expense"].map((type) {
+                            return Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Radio<String>(
+                                  value: type,
+                                  groupValue: _selectedType,
+                                  onChanged: (value) {
+                                    setStateDialog(() {
+                                      _selectedType = value;
+                                      _showTypeError = false;
+                                    });
+                                  },
+                                ),
+                                Text(type),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                        if (_showTypeError)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(
+                              "Please select a type",
+                              style: TextStyle(color: Colors.red, fontSize: 12),
+                            ),
                           ),
+                      ],
+                    )
+                  else
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          "Type: ${existing.type}",
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),
-              ],
+                    ),
+                  TextFormField(
+                    controller: _nameController,
+                    style: TextStyle(color: Colors.black),
+                    decoration: InputDecoration(
+                      labelText: "Category Name",
+                      labelStyle: TextStyle(color: Colors.black),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Colors.black.withOpacity(0.3),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: theme.main_button_color),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter category name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Choose Icon",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: commonIcons.map((icon) {
+                      final isSelected = _selectedIcon == icon;
+                      return RawChip(
+                        label: Icon(
+                          icon,
+                          size: 20,
+                          color: isSelected
+                              ? Colors.white
+                              : theme.main_text_color,
+                        ),
+                        selected: isSelected,
+                        onSelected: (_) {
+                          setStateDialog(() {
+                            _selectedIcon = icon;
+                            _showIconError = false;
+                          });
+                        },
+                        selectedColor: Colors.lightBlueAccent,
+                        backgroundColor: theme.background_color,
+                        showCheckmark: false,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  if (_showIconError)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6.0),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Please select an icon",
+                          style: TextStyle(color: Colors.red, fontSize: 12),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Choose Color",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: commonColors.map((color) {
+                      return GestureDetector(
+                        onTap: () =>
+                            setStateDialog(() => _selectedColor = color),
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: _selectedColor == color
+                                  ? Colors.black
+                                  : Colors.transparent,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
@@ -240,13 +295,18 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                 backgroundColor: theme.main_button_color,
               ),
               onPressed: () async {
-                final name = _nameController.text.trim();
-                if (name.isEmpty ||
-                    _selectedIcon == null ||
-                    (_selectedType == null && existing == null)) {
-                  return;
-                }
+                bool formValid = _formKey.currentState!.validate();
+                bool iconValid = _selectedIcon != null;
+                bool typeValid = existing != null || _selectedType != null;
 
+                setStateDialog(() {
+                  _showIconError = !iconValid;
+                  _showTypeError = !typeValid;
+                });
+
+                if (!formValid || !iconValid || !typeValid) return;
+
+                final name = _nameController.text.trim();
                 final nameExists = _categories.any(
                   (cat) =>
                       cat.name.toLowerCase() == name.toLowerCase() &&
@@ -255,41 +315,33 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
 
                 if (nameExists) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Name already exists',
-                      ),
-                    ),
+                    SnackBar(content: Text('Name already exists')),
                   );
                   return;
                 }
 
                 if (existing != null) {
-                  final result = await _fetchUpdateCategory(selectedCategory!, name, 
-                                _selectedIcon!.codePoint, converter.colorToHex(_selectedColor));
-                  setState(() {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          result.toString(),
-                        ),
-                      ),
-                    );
-                    _fetchCategories();
-                  });
+                  final result = await _fetchUpdateCategory(
+                    selectedCategory!,
+                    name,
+                    _selectedIcon!.codePoint,
+                    converter.colorToHex(_selectedColor),
+                  );
+                  _fetchCategories();
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(result)));
                 } else {
-                  final result = await _fetchAddCategory(name, _selectedType!, 
-                                _selectedIcon!.codePoint, converter.colorToHex(_selectedColor));
-                  setState(() {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          result.toString(),
-                        ),
-                      ),
-                    );
-                    _fetchCategories();
-                  });
+                  final result = await _fetchAddCategory(
+                    name,
+                    _selectedType!,
+                    _selectedIcon!.codePoint,
+                    converter.colorToHex(_selectedColor),
+                  );
+                  _fetchCategories();
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(result)));
                 }
 
                 Navigator.pop(context);
@@ -304,7 +356,6 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -364,7 +415,11 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: category.color,
-                      child: Icon(category.icon, color: currentTheme.sub_button_color, size: 20),
+                      child: Icon(
+                        category.icon,
+                        color: currentTheme.sub_button_color,
+                        size: 20,
+                      ),
                     ),
                     title: Text(
                       category.name,
@@ -383,9 +438,9 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                             color: theme.main_button_color,
                           ),
                           onPressed: () {
-                              selectedCategory = int.parse(_categories[index].id);
-                              _showCategoryDialog(existing: category);
-                          }
+                            selectedCategory = int.parse(_categories[index].id);
+                            _showCategoryDialog(existing: category);
+                          },
                         ),
                         IconButton(
                           icon: Icon(
@@ -393,16 +448,14 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                             color: theme.main_button_color.withOpacity(0.7),
                           ),
                           onPressed: () async {
-                            final result = await _fetchDeleteCategory(int.parse(_categories[index].id));
+                            final result = await _fetchDeleteCategory(
+                              int.parse(_categories[index].id),
+                            );
                             setState(() {
                               _categories.removeAt(index);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    result.toString(),
-                                  ),
-                                ),
-                              );
+                              ScaffoldMessenger.of(
+                                context,
+                              ).showSnackBar(SnackBar(content: Text(result)));
                             });
                           },
                         ),
