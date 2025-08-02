@@ -205,7 +205,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     Map<String, List<TransactionHistory>> grouped = {};
     for (var transaction in _filteredTransactions) {
       String dateKey =
-          '${transaction.transactionDate.month}/${transaction.transactionDate.day}/${transaction.transactionDate.year}';
+          '${transaction.transactionDate.day}/${transaction.transactionDate.month}/${transaction.transactionDate.year}';
       if (!grouped.containsKey(dateKey)) {
         grouped[dateKey] = [];
       }
