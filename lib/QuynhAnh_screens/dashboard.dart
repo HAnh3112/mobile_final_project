@@ -25,6 +25,9 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int userId = 1;
+  String username = "alice";
+
+  
   int _selectedIndex = 0; // To keep track of the selected tab
 
   // List of screens to navigate to
@@ -67,7 +70,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
         automaticallyImplyLeading: false,
         backgroundColor: currentTheme.background_color,
         elevation: 0,
-        title: Text(
+        title: (_selectedIndex == 0)? 
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              titleName(_selectedIndex),
+              style: TextStyle(
+                color: currentTheme.main_text_color,
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text("Welcome back, $username!", style: TextStyle(fontSize: 18, color: currentTheme.sub_text_color),)
+          ],
+        )
+        :Text(
           titleName(_selectedIndex),
           style: TextStyle(
             color: currentTheme.main_text_color,
