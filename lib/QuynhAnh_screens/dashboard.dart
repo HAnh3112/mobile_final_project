@@ -1,11 +1,13 @@
 // lib/dashboard_screen.dart
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/BudgetPlanning.dart';
+import 'package:final_project/DoanAnhVu/DTO/TransactionHistoryDTO.dart';
 import 'package:final_project/DoanAnhVu/DTO/TransactionSummary.dart';
 import 'package:final_project/DoanAnhVu/services/transaction_service.dart';
 import 'package:final_project/DoanAnhVu/transaction_history_screen.dart';
 import 'package:final_project/QuynhAnh_screens/ExpenseBreakdownScreen.dart';
 import 'package:final_project/QuynhAnh_screens/add_transaction_screen.dart';
 import 'package:final_project/QuynhAnh_screens/model/ExpenseOverview.dart';
+import 'package:final_project/QuynhAnh_screens/model/Summary.dart';
 import 'package:final_project/QuynhAnh_screens/service/ExpenseOverview_service.dart';
 import 'package:final_project/screens_Giap/auth_screen.dart';
 import 'package:final_project/screens_Giap/category_management_screen.dart';
@@ -13,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/theme.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:intl/intl.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -21,28 +24,12 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _selectedIndex = 0; // To keep track of the selected tab
-  final TransactionService rht = TransactionService();
-  List<TransactionSummary> ltht = [];
   int userId = 1;
-  void _viewRecentTransactionHistory() async {
-    final results = await rht.getUserRecentHistory(userId);
-    setState(() {
-      ltht = results;
-    });
-
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _viewRecentTransactionHistory();
-  }
+  int _selectedIndex = 0; // To keep track of the selected tab
 
   // List of screens to navigate to
   List<Widget> _widgetOptions() => [
-    _DashboardContent(userId: userId, ltht: ltht,),
+    _DashboardContent(userId: userId),
     TransactionHistoryScreen(),
     AddTransactionScreen(),
     BudgetPlanning(),
@@ -181,9 +168,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
 class _DashboardContent extends StatefulWidget {
   int? userId;
-  List<TransactionSummary>? ltht;
 
-  _DashboardContent({super.key, required this.userId, required this.ltht});
+  _DashboardContent({super.key, required this.userId});
 
   @override
   State<StatefulWidget> createState() => __DashboardContentState();
@@ -193,10 +179,56 @@ class _DashboardContent extends StatefulWidget {
 class __DashboardContentState extends State<_DashboardContent> {
 
   final ExpenseOverview_service eos = ExpenseOverview_service();
+  final TransactionService rht = TransactionService();
   List<ExpenseOverview> leo = [];
+  List<TransactionSummary> ltht = [];
+
+  Summary? sm;
+  
+  final DateFormat dateFormat = DateFormat("MM/yyyy");
+  final DateFormat datetran = DateFormat("dd/MM/yyyy");
+  DateTime currentDate = DateTime.now();
+  DateTime pickedDate = DateTime.now();
+
+
+  void _showMonthPicker() async {
+    final selected = await showMonthPicker(
+      context: context,
+      initialDate: pickedDate,
+      firstDate: DateTime(currentDate.year - 1,currentDate.month),
+      lastDate: currentDate,
+    );
+    if (selected != null) {
+      final expense = await eos.showtop3ExOverview(widget.userId!, selected.month, selected.year);
+
+      setState(() {
+        pickedDate = selected;
+        leo = expense;
+      });
+    }
+  } 
+
+  void ViewSummary() async {
+    final result = await eos.showSummary(widget.userId!, pickedDate.month, pickedDate.year);
+
+    setState(() {
+        sm = result;
+    });
+  }
+  
+
+
+  void _viewRecentTransactionHistory() async {
+    final results = await rht.getUserRecentHistory(widget.userId!);
+    setState(() {
+      ltht = results;
+    });
+
+  }
+
 
   void CallExpenseOverview () async {
-    final result = await eos.showtop3ExOverview(widget.userId!, DateTime.now().month, DateTime.now().year);
+    final result = await eos.showtop3ExOverview(widget.userId!, pickedDate.month, pickedDate.year);
     setState(() {
       leo = result;
     });
@@ -207,12 +239,16 @@ class __DashboardContentState extends State<_DashboardContent> {
     // TODO: implement initState
     super.initState();
     CallExpenseOverview();
+    _viewRecentTransactionHistory();
+    ViewSummary();
   }  
-  
-  final DateFormat datetran = DateFormat("dd/MM/yyyy");
 
   @override
   Widget build(BuildContext context) {
+    if (sm == null) {
+      return Center(child: CircularProgressIndicator());
+    }
+
     // context is available here
     return Padding(
       padding: const EdgeInsets.all(18.0),
@@ -240,26 +276,34 @@ class __DashboardContentState extends State<_DashboardContent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          TextButton.icon(
+            onPressed: _showMonthPicker,
+            icon: const Icon(Icons.calendar_today, color: Colors.white, size: 25,),
+            label: Text(
+              dateFormat.format(pickedDate),
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 25),
+            ),
+          ),
+          const SizedBox(height: 10,),
           Text(
             'Balance',
-            style: TextStyle(color: Colors.white70, fontSize: 15),
+            style: TextStyle(color: Colors.white70, fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 5),
           Text(
-            '\$0',
+            '${sm!.income - sm!.expense} VND',
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 38,
+              color: (sm!.income - sm!.expense < 0)? Colors.redAccent: Colors.greenAccent,
+              fontSize: 32,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 12),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildBalanceDetail('Income', '\$0'),
-              _buildBalanceDetail('Expense', '\$0'),
-              _buildBalanceDetail('Saved', '0%'),
+              _buildBalanceDetail('Income', sm!.income.toString(), const Color.fromARGB(255, 0, 255, 4)),
+              _buildBalanceDetail('Expense', sm!.expense.toString(), const Color.fromARGB(255, 228, 34, 99))
             ],
           ),
         ],
@@ -267,16 +311,16 @@ class __DashboardContentState extends State<_DashboardContent> {
     );
   }
 
-  Widget _buildBalanceDetail(String label, String value) {
+  Widget _buildBalanceDetail(String label, String value, Color color) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(label, style: TextStyle(color: Colors.white70, fontSize: 13)),
+        Text(label, style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold)),
         const SizedBox(height: 3),
         Text(
           value,
           style: TextStyle(
-            color: Colors.white,
+            color: color,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -318,7 +362,7 @@ class __DashboardContentState extends State<_DashboardContent> {
                 },
                 child: Text(
                   'View',
-                  style: TextStyle(color: currentTheme.main_button_color),
+                  style: TextStyle(color: currentTheme.sub_text_color),
                 ),
               ),
             ],
@@ -372,7 +416,7 @@ class __DashboardContentState extends State<_DashboardContent> {
             ],
           ),
           Text(
-            amount,
+            '$amount đ',
             style: TextStyle(
               color: currentTheme.main_text_color,
               fontWeight: FontWeight.bold,
@@ -418,13 +462,13 @@ class __DashboardContentState extends State<_DashboardContent> {
                 },
                 child: Text(
                   'View All',
-                  style: TextStyle(color: currentTheme.main_button_color),
+                  style: TextStyle(color: currentTheme.sub_text_color),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          ...widget.ltht!.map((rt) => (
+          ...ltht!.map((rt) => (
             _buildTransactionItem(rt.categoryName, datetran.format(rt.transactionDate), rt.amount.toString(), (rt.categoryType == "Income")? true:false)
           )).toList()
         ],

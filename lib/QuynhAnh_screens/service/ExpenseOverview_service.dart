@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:final_project/QuynhAnh_screens/model/ExpenseOverview.dart';
+import 'package:final_project/QuynhAnh_screens/model/Summary.dart';
 import 'package:final_project/global_variable/ip_address.dart';
 import 'package:final_project/model/AvailableCategory.dart';
 import 'package:final_project/model/Budget.dart';
@@ -26,7 +27,30 @@ class ExpenseOverview_service{
       return data.map((json) => ExpenseOverview.fromJson(json)).toList();
     } else {
       print("Failed");
-      throw Exception('Failed to fetch budgets');
+      throw Exception('Failed to fetch top3 expense overview');
+    }
+  }
+
+  Future<Summary> showSummary(int id, int month, int year) async {
+    final url = Uri.http(currentHost, "/api/monthlyreport/monthlySummary",
+      {
+        'userID': id.toString(),
+        'month': month.toString(),
+        'year': year.toString(),
+      },
+    );
+    
+    print("Data is being fetch...");
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final Map<String ,dynamic> data = jsonDecode(response.body);
+      print("Success!");
+      return Summary.fromJson(data);
+    } else {
+      print("Failed");
+      throw Exception('Failed to fetch overview');
     }
   }
 
