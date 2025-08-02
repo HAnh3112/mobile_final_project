@@ -407,6 +407,7 @@ class AddTransactionScreen extends StatefulWidget {
 }
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
+  int userID = 1; // **QUAN TRỌNG: Thay thế 1 bằng ID người dùng thực tế**
   bool _isIncome = true;
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
@@ -438,8 +439,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       _isLoadingCategories = true;
     });
     try {
-      final incomeCats = await _categoryService.getIncomeCategories();
-      final expenseCats = await _categoryService.getExpenseCategories();
+      final incomeCats = await _categoryService.getIncomeCategories(userID);
+      final expenseCats = await _categoryService.getExpenseCategories(userID);
       setState(() {
         _incomeCategories = incomeCats;
         _expenseCategories = expenseCats;
@@ -503,7 +504,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           ? _notesController.text
           : 'No note';
       final int userId =
-          1; // **QUAN TRỌNG: Thay thế 1 bằng ID người dùng thực tế**
+          userID;
       final int categoryId =
           _selectedCategory!.categoryId; // Lấy categoryId từ đối tượng đã chọn
 

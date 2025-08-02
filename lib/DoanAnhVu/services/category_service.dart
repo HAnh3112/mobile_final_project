@@ -7,9 +7,9 @@ import 'package:final_project/global_variable/ip_address.dart'; // Đảm bảo 
 class CategoryService {
   final String baseUrl = 'http://$currentHost/api/categories'; // Endpoint của CategoryController
 
-  Future<List<CategorySimpleDTO>> getIncomeCategories() async {
+  Future<List<CategorySimpleDTO>> getIncomeCategories(int userID) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/income'));
+      final response = await http.get(Uri.parse('$baseUrl/income?userID=$userID'));
 
       if (response.statusCode == 200) {
         List<dynamic> body = json.decode(response.body);
@@ -25,9 +25,9 @@ class CategoryService {
     }
   }
 
-  Future<List<CategorySimpleDTO>> getExpenseCategories() async {
+  Future<List<CategorySimpleDTO>> getExpenseCategories(int userID) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/expense'));
+      final response = await http.get(Uri.parse('$baseUrl/expense?userID=$userID'));
 
       if (response.statusCode == 200) {
         List<dynamic> body = json.decode(response.body);

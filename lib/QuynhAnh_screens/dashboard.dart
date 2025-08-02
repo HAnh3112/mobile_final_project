@@ -5,11 +5,14 @@ import 'package:final_project/DoanAnhVu/services/transaction_service.dart';
 import 'package:final_project/DoanAnhVu/transaction_history_screen.dart';
 import 'package:final_project/QuynhAnh_screens/ExpenseBreakdownScreen.dart';
 import 'package:final_project/QuynhAnh_screens/add_transaction_screen.dart';
+import 'package:final_project/QuynhAnh_screens/model/ExpenseOverview.dart';
+import 'package:final_project/QuynhAnh_screens/service/ExpenseOverview_service.dart';
 import 'package:final_project/screens_Giap/auth_screen.dart';
 import 'package:final_project/screens_Giap/category_management_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/theme.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -27,6 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() {
       ltht = results;
     });
+
   }
 
   @override
@@ -187,7 +191,25 @@ class _DashboardContent extends StatefulWidget {
 
 // Extract your original dashboard body into a separate widget
 class __DashboardContentState extends State<_DashboardContent> {
+
+  final ExpenseOverview_service eos = ExpenseOverview_service();
+  List<ExpenseOverview> leo = [];
+
+  void CallExpenseOverview () async {
+    final result = await eos.showtop3ExOverview(widget.userId!, DateTime.now().month, DateTime.now().year);
+    setState(() {
+      leo = result;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    CallExpenseOverview();
+  }  
   
+  final DateFormat datetran = DateFormat("dd/MM/yyyy");
 
   @override
   Widget build(BuildContext context) {
@@ -202,7 +224,6 @@ class __DashboardContentState extends State<_DashboardContent> {
           const SizedBox(height: 15),
           _buildRecentTransactions(context), // Pass context here
           const SizedBox(height: 15),
-          _buildMonthlySummaryRow(),
         ],
       ),
     );
@@ -326,9 +347,7 @@ class __DashboardContentState extends State<_DashboardContent> {
               Expanded(
                 child: Column(
                   children: [
-                    _buildExpenseItem('Food', '100\$'),
-                    _buildExpenseItem('Transport', '100\$'),
-                    _buildExpenseItem('Shopping', '100\$'),
+                    ...leo.map((lt) => (_buildExpenseItem(lt.name, lt.amount)))
                   ],
                 ),
               ),
@@ -406,7 +425,7 @@ class __DashboardContentState extends State<_DashboardContent> {
           ),
           const SizedBox(height: 8),
           ...widget.ltht!.map((rt) => (
-            _buildTransactionItem(rt.categoryName, rt.transactionDate.toString(), rt.amount.toString(), (rt.categoryType == "Income")? true:false)
+            _buildTransactionItem(rt.categoryName, datetran.format(rt.transactionDate), rt.amount.toString(), (rt.categoryType == "Income")? true:false)
           )).toList()
         ],
       ),
@@ -448,61 +467,9 @@ class __DashboardContentState extends State<_DashboardContent> {
             ),
           ),
           Text(
-            amount,
+            "$amount đ",
             style: TextStyle(
               color: isIncome ? Colors.green : Colors.red,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Monthly Summary Row
-  Widget _buildMonthlySummaryRow() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildMonthlySummaryCard(
-            icon: Icons.add_circle_outline,
-            color: Colors.green,
-            amount: '+\$0',
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _buildMonthlySummaryCard(
-            icon: Icons.remove_circle_outline,
-            color: Colors.red,
-            amount: '-\$0',
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMonthlySummaryCard({
-    required IconData icon,
-    required Color color,
-    required String amount,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: currentTheme.sub_button_color,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: 7),
-          Text(
-            amount,
-            style: TextStyle(
-              color: color,
-              fontSize: 15,
               fontWeight: FontWeight.bold,
             ),
           ),

@@ -16,9 +16,9 @@ class CategorySimpleDTO {
   factory CategorySimpleDTO.fromJson(Map<String, dynamic> json) {
   return CategorySimpleDTO(
     categoryId: json['categoryId'] ?? 0,
-    categoryName: json['name']?.toString() ?? 'Unknown',
+    categoryName: json['categoryName']?.toString() ?? 'Unknown',
     iconCode: json['iconCode'] ?? 0,
-    iconColor: json['iconColor']?.toString() ?? '#000000',
+    iconColor: json['colorCode']?.toString() ?? '#000000',
   );
 }
 }
