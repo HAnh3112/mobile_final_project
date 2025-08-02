@@ -77,6 +77,116 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     }
   }
 
+
+  // Delete transaction function - Call API to delete transaction by ID
+  Future<void> _deleteTransaction(int transactionId) async {
+    try {
+      // Show loading indicator during deletion
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Center(
+            child: CircularProgressIndicator(
+              color: currentTheme.main_button_color,
+            ),
+          );
+        },
+      );
+
+      // Call API to delete transaction
+      final success = await _transactionService.deleteTransaction(transactionId);
+      
+      // Hide loading dialog
+      Navigator.of(context).pop();
+
+      if (success) {
+        // Remove transaction from local lists to update UI immediately
+        setState(() {
+          _allTransactions.removeWhere((transaction) => 
+              transaction.transactionID == transactionId);
+          _applyFilters(); // Reapply filters to update filtered list
+        });
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Transaction deleted successfully'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        // Show error message if deletion failed
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete transaction'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      // Hide loading dialog if still showing
+      Navigator.of(context).pop();
+      
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error deleting transaction: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      print('Delete transaction error: ${e.toString()}');
+    }
+  }
+
+  // Show confirmation dialog before deleting transaction
+  Future<void> _showDeleteConfirmation(TransactionHistory transaction) async {
+    final bool? shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: currentTheme.sub_button_color,
+          title: Text(
+            'Delete Transaction',
+            style: TextStyle(color: currentTheme.main_text_color),
+          ),
+          content: Text(
+            'Are you sure you want to delete this transaction?\n\n'
+            '${transaction.categoryType} - ${transaction.categoryName}\n'
+            '\$${transaction.amount.toStringAsFixed(2)}',
+            style: TextStyle(color: currentTheme.sub_text_color),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: currentTheme.sub_text_color),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(
+                'Delete',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    // If user confirmed deletion, proceed with delete
+    if (shouldDelete == true) {
+      await _deleteTransaction(transaction.transactionID);
+    }
+  }
+
+  //// end of delete function
+
   // Phương thức để áp dụng tất cả các bộ lọc (tìm kiếm, loại, danh mục, ngày, số tiền)
   void _applyFilters() {
     // Use the TransactionFilterService to apply all filters
@@ -493,76 +603,171 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                               ],
                             ),
                           ),
+                          // Wrap each transaction in Dismissible widget for swipe-to-delete functionality
                           ...dayTransactions.map(
-                            (transaction) => Container(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: theme.sub_button_color,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: theme.sub_text_color.withOpacity(0.1),
+                            (transaction) => Dismissible(
+                              // Unique key for each transaction based on transaction ID
+                              key: Key('transaction_${transaction.transactionID}'),
+                              // Only allow left-to-right swipe for deletion
+                              direction: DismissDirection.startToEnd,
+                              // Custom dismiss thresholds - require 40% swipe to trigger
+                              dismissThresholds: const {
+                                DismissDirection.startToEnd: 0.4,
+                              },
+                              // Background widget shown while swiping (red background with delete icon)
+                              background: Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.red, // Red background for delete action
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 48,
-                                    height: 48,
-                                    decoration: BoxDecoration(
-                                      color: dtc
-                                          .hexToColor(transaction.colorCode)
-                                          .withOpacity(0.1),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      IconData(
-                                        transaction.iconCode,
-                                        fontFamily: 'MaterialIcons',
-                                      ),
-                                      color: dtc.hexToColor(
-                                        transaction.colorCode,
-                                      ),
+                                alignment: Alignment.centerLeft,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.delete, // White garbage/delete icon
+                                      color: Colors.white,
                                       size: 24,
                                     ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          transaction
-                                              .categoryType, // Hiển thị loại giao dịch
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            color: theme.main_text_color,
-                                          ),
-                                        ),
-                                        Text(
-                                          transaction
-                                              .categoryName, // Hiển thị tên danh mục
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: theme.sub_text_color,
-                                          ),
-                                        ),
-                                      ],
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Delete', // Delete text
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
+                                  ],
+                                ),
+                              ),
+                              // Handle dismiss action - show confirmation dialog
+                              onDismissed: (direction) {
+                                // This is called after the swipe is complete
+                                // We don't actually delete here, we show confirmation first
+                                _showDeleteConfirmation(transaction);
+                              },
+                              // Confirm dismiss - show confirmation dialog before actual deletion
+                              confirmDismiss: (direction) async {
+                                // Return false to prevent automatic dismissal
+                                // We handle the deletion manually after confirmation
+                                if (direction == DismissDirection.startToEnd) {
+                                  // Show confirmation dialog and return the result
+                                  final bool? shouldDelete = await showDialog<bool>(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        backgroundColor: currentTheme.sub_button_color,
+                                        title: Text(
+                                          'Delete Transaction',
+                                          style: TextStyle(color: currentTheme.main_text_color),
+                                        ),
+                                        content: Text(
+                                          'Are you sure you want to delete this transaction?\n\n'
+                                          '${transaction.categoryType} - ${transaction.categoryName}\n'
+                                          '\$${transaction.amount.toStringAsFixed(2)}',
+                                          style: TextStyle(color: currentTheme.sub_text_color),
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(false),
+                                            child: Text(
+                                              'Cancel',
+                                              style: TextStyle(color: currentTheme.sub_text_color),
+                                            ),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(true),
+                                            child: Text(
+                                              'Delete',
+                                              style: TextStyle(color: Colors.red),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+
+                                  // If user confirmed, proceed with API deletion
+                                  if (shouldDelete == true) {
+                                    await _deleteTransaction(transaction.transactionID);
+                                    return true; // Allow dismissal
+                                  }
+                                  return false; // Cancel dismissal
+                                }
+                                return false;
+                              },
+                              // The actual transaction widget
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: theme.sub_button_color,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: theme.sub_text_color.withOpacity(0.1),
                                   ),
-                                  Text(
-                                    '${transaction.isIncome ? '+' : '-'}\$${transaction.amount.toStringAsFixed(2)}',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: transaction.isIncome
-                                          ? Colors.green
-                                          : Colors.red,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 48,
+                                      height: 48,
+                                      decoration: BoxDecoration(
+                                        color: dtc
+                                            .hexToColor(transaction.colorCode)
+                                            .withOpacity(0.1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        IconData(
+                                          transaction.iconCode,
+                                          fontFamily: 'MaterialIcons',
+                                        ),
+                                        color: dtc.hexToColor(
+                                          transaction.colorCode,
+                                        ),
+                                        size: 24,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            transaction
+                                                .categoryType, // Hiển thị loại giao dịch
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              color: theme.main_text_color,
+                                            ),
+                                          ),
+                                          Text(
+                                            transaction
+                                                .categoryName, // Hiển thị tên danh mục
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: theme.sub_text_color,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Text(
+                                      '${transaction.isIncome ? '+' : '-'}\$${transaction.amount.toStringAsFixed(2)}',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: transaction.isIncome
+                                            ? Colors.green
+                                            : Colors.red,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
