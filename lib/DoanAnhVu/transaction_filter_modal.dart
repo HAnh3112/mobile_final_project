@@ -39,10 +39,10 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
     );
     
     if (_filterData.minAmount != null) {
-      _minAmountController.text = _filterData.minAmount!.toStringAsFixed(2);
+      _minAmountController.text = _filterData.minAmount!.toStringAsFixed(0);
     }
     if (_filterData.maxAmount != null) {
-      _maxAmountController.text = _filterData.maxAmount!.toStringAsFixed(2);
+      _maxAmountController.text = _filterData.maxAmount!.toStringAsFixed(0);
     }
   }
 
@@ -212,7 +212,7 @@ class _TransactionFilterModalState extends State<TransactionFilterModal> {
           keyboardType: TextInputType.numberWithOptions(decimal: true),
           style: TextStyle(color: currentTheme.main_text_color),
           decoration: InputDecoration(
-            prefixText: '\$',
+            prefixText: 'VND ',
             prefixStyle: TextStyle(color: currentTheme.main_text_color),
             filled: true,
             fillColor: currentTheme.sub_button_color,

@@ -153,10 +153,10 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
             'Delete Transaction',
             style: TextStyle(color: currentTheme.main_text_color),
           ),
-          content: Text(
+        content: Text(
             'Are you sure you want to delete this transaction?\n\n'
             '${transaction.categoryType} - ${transaction.categoryName}\n'
-            '\$${transaction.amount.toStringAsFixed(2)}',
+            '${transaction.amount.toStringAsFixed(0)} VND',
             style: TextStyle(color: currentTheme.sub_text_color),
           ),
           actions: [
@@ -665,7 +665,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                                         content: Text(
                                           'Are you sure you want to delete this transaction?\n\n'
                                           '${transaction.categoryType} - ${transaction.categoryName}\n'
-                                          '\$${transaction.amount.toStringAsFixed(2)}',
+                                          '${transaction.amount.toStringAsFixed(0)} VND',
                                           style: TextStyle(color: currentTheme.sub_text_color),
                                         ),
                                         actions: [
@@ -757,7 +757,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                                       ),
                                     ),
                                     Text(
-                                      '${transaction.isIncome ? '+' : '-'}\$${transaction.amount.toStringAsFixed(2)}',
+                                      '${transaction.isIncome ? '+' : '-'}${transaction.amount.toStringAsFixed(0)} VND',
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,
