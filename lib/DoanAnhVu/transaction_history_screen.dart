@@ -378,25 +378,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               ],
             )
           : null,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: theme.main_button_color,
-        child: Icon(Icons.add, color: currentTheme.main_text_color),
-        onPressed: () async {
-          // Khi thêm giao dịch mới, sau khi thêm thành công, gọi lại _fetchTransactions
-          final newTransaction = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => AddTransactionScreen(showTabbar: true),
-            ),
-          );
-
-          if (newTransaction != null) {
-            // Giả sử AddTransactionScreen trả về một đối tượng có thể được sử dụng
-            // hoặc chỉ đơn giản là gọi lại _fetchTransactions để tải lại dữ liệu mới nhất
-            _fetchTransactions();
-          }
-        },
-      ),
       body: Column(
         children: [
           Padding(

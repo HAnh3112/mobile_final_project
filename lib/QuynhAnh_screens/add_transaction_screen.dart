@@ -527,6 +527,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(results)));
+
       // Navigator.pushReplacement(context, MaterialPageRoute(builder: (builder) => TransactionHistoryScreen(showAppBar: true,)));
       if (results.contains("Succeed")) {
         setState(() {

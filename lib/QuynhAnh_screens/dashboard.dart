@@ -295,15 +295,17 @@ class __DashboardContentState extends State<_DashboardContent> {
     // context is available here
     return Padding(
       padding: const EdgeInsets.all(18.0),
-      child: Column(
-        children: [
-          _buildBalanceCard(),
-          const SizedBox(height: 20),
-          _buildExpenseOverviewCard(context), // Pass context here
-          const SizedBox(height: 15),
-          _buildRecentTransactions(context), // Pass context here
-          const SizedBox(height: 15),
-        ],
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            _buildBalanceCard(),
+            const SizedBox(height: 20),
+            _buildExpenseOverviewCard(context), // Pass context here
+            const SizedBox(height: 15),
+            _buildRecentTransactions(context), // Pass context here
+            const SizedBox(height: 15),
+          ],
+        ),
       ),
     );
   }
