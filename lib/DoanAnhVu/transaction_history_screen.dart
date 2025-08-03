@@ -4,6 +4,7 @@ import 'package:final_project/DoanAnhVu/services/transaction_filter_service.dart
 import 'package:final_project/DoanAnhVu/model/filter_data.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/theme.dart';
+import 'package:final_project/global_variable/number_format.dart';
 import 'package:final_project/model/User.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project/QuynhAnh_screens/add_transaction_screen.dart';
@@ -760,7 +761,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                                       ),
                                     ),
                                     Text(
-                                      '${transaction.isIncome ? '+' : '-'}${transaction.amount.toStringAsFixed(0)} VND',
+                                      '${transaction.isIncome ? '+' : '-'}${numFormat.format(transaction.amount)} VND',
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w600,

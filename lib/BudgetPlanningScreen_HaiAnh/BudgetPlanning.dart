@@ -1,4 +1,5 @@
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/PrefixScreen.dart';
+import 'package:final_project/global_variable/number_format.dart';
 import 'package:final_project/model/Budget.dart';
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/service/budget_service.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
@@ -270,17 +271,17 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
               const SizedBox(height: 15),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 const Text("Total budget:", style: TextStyle(color: Colors.white70),),
-                Text("$totalBudget đ", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                Text("${numFormat.format(totalBudget)} đ", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
               ]),
               const SizedBox(height: 15),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 const Text("Total spent:", style: TextStyle(color: Colors.white70)),
-                Text("$totalSpent đ", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                Text("${numFormat.format(totalSpent)} đ", style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
               ]),
               const SizedBox(height: 15),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 const Text("Remaining:", style: TextStyle(color: Colors.white70)),
-                Text("$remaining đ", style: TextStyle(fontWeight: FontWeight.bold,color: (remaining<0)? Colors.redAccent:Colors.greenAccent)),
+                Text("${numFormat.format(remaining)} đ", style: TextStyle(fontWeight: FontWeight.bold,color: (remaining<0)? Colors.redAccent:Colors.greenAccent)),
               ]),
               const SizedBox(height: 20),
               Container(
@@ -486,7 +487,7 @@ class _BudgetPlannignBodyState extends State<BudgetPlanningBody> {
                               ),
                             )
                           : Text(
-                              "${budget.spentAmount} / ${budget.amount} đ",
+                              "${numFormat.format(budget.spentAmount)} / ${numFormat.format(budget.amount)} đ",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: (budget.spentAmount > budget.amount)

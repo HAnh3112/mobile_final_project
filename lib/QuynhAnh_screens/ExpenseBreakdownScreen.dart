@@ -1,5 +1,6 @@
 import 'package:final_project/QuynhAnh_screens/model/ExpenseOverview.dart';
 import 'package:final_project/QuynhAnh_screens/service/ExpenseOverview_service.dart';
+import 'package:final_project/global_variable/number_format.dart';
 import 'package:final_project/model/User.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -77,13 +78,13 @@ class _ExpenseBreakdownScreenState extends State<ExpenseBreakdownScreen> {
           icon: Icons.arrow_upward,
           color: Colors.green,
           title: "This month",
-          amount: "${widget.income.toString()} đ" ,
+          amount: "${numFormat.format(widget.income)} đ" ,
         ),
         _buildSummaryCard(
           icon: Icons.arrow_downward,
           color: Colors.red,
           title: "This month",
-          amount: '${widget.expense.toString()} đ',
+          amount: '${numFormat.format(widget.expense)} đ',
         ),
       ],
     );
@@ -166,7 +167,7 @@ class _ExpenseBreakdownScreenState extends State<ExpenseBreakdownScreen> {
                         Text (item.name, style: TextStyle(color: currentTheme.main_text_color, fontWeight: FontWeight.bold, fontSize: 16),),
                       ],
                     ),
-                    Text("${item.amount} (${(100* double.parse(item.amount) / widget.expense).toStringAsFixed(1)}%)", style: TextStyle(color: currentTheme.main_text_color, fontSize: 16)),
+                    Text("${numFormat.format(double.parse(item.amount))} (${(100* double.parse(item.amount) / widget.expense).toStringAsFixed(1)}%)", style: TextStyle(color: currentTheme.main_text_color, fontSize: 16)),
                   ],
                 ),
               );

@@ -1,6 +1,7 @@
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/AddPrefixScreen.dart';
 import 'package:final_project/BudgetPlanningScreen_HaiAnh/service/prefix_service.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
+import 'package:final_project/global_variable/number_format.dart';
 import 'package:final_project/model/Prefix.dart';
 import 'package:final_project/model/User.dart';
 import 'package:flutter/material.dart';
@@ -250,7 +251,7 @@ class _PrefixScreenBodyState extends State<PrefixScreenBody>{
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: currentTheme.sub_button_text_color),
                       ),
                       Text(
-                        '${allPrefix[index].amount} VND',
+                        '${numFormat.format(allPrefix[index].amount)} VND',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: currentTheme.sub_button_text_color),
                       ),
                     ],

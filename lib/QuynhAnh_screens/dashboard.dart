@@ -9,6 +9,7 @@ import 'package:final_project/QuynhAnh_screens/add_transaction_screen.dart';
 import 'package:final_project/QuynhAnh_screens/model/ExpenseOverview.dart';
 import 'package:final_project/QuynhAnh_screens/model/Summary.dart';
 import 'package:final_project/QuynhAnh_screens/service/ExpenseOverview_service.dart';
+import 'package:final_project/global_variable/number_format.dart';
 import 'package:final_project/model/User.dart';
 import 'package:final_project/screens_Giap/auth_screen.dart';
 import 'package:final_project/screens_Giap/category_management_screen.dart';
@@ -333,7 +334,7 @@ class __DashboardContentState extends State<_DashboardContent> {
           ),
           const SizedBox(height: 5),
           Text(
-            '${sm!.income - sm!.expense} VND',
+            '${numFormat.format(sm!.income - sm!.expense)} VND',
             style: TextStyle(
               color: (sm!.income - sm!.expense < 0)? Colors.redAccent: Colors.greenAccent,
               fontSize: 32,
@@ -344,8 +345,8 @@ class __DashboardContentState extends State<_DashboardContent> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildBalanceDetail('Income', sm!.income.toString(), const Color.fromARGB(255, 0, 255, 4)),
-              _buildBalanceDetail('Expense', sm!.expense.toString(), const Color.fromARGB(255, 228, 34, 99))
+              _buildBalanceDetail('Income', numFormat.format(sm!.income), const Color.fromARGB(255, 0, 255, 4)),
+              _buildBalanceDetail('Expense', numFormat.format(sm!.expense), const Color.fromARGB(255, 228, 34, 99))
             ],
           ),
         ],
@@ -360,7 +361,7 @@ class __DashboardContentState extends State<_DashboardContent> {
         Text(label, style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold)),
         const SizedBox(height: 3),
         Text(
-          value,
+          "$value VND",
           style: TextStyle(
             color: color,
             fontSize: 18,
@@ -434,7 +435,7 @@ class __DashboardContentState extends State<_DashboardContent> {
               Expanded(
                 child: Column(
                   children: [
-                    ...leo.map((lt) => (_buildExpenseItem(lt.name, lt.amount)))
+                    ...leo.map((lt) => (_buildExpenseItem(lt.name, numFormat.format(double.parse(lt.amount)))))
                   ],
                 ),
               ),
@@ -512,7 +513,7 @@ class __DashboardContentState extends State<_DashboardContent> {
           ),
           const SizedBox(height: 8),
           ...ltht.map((rt) => (
-            _buildTransactionItem(rt.categoryName, datetran.format(rt.transactionDate), rt.amount.toString(), (rt.categoryType == "Income")? true:false)
+            _buildTransactionItem(rt.categoryName, datetran.format(rt.transactionDate), numFormat.format(rt.amount), (rt.categoryType == "Income")? true:false)
           )),
           if(ltht.isEmpty) Container(
             alignment: AlignmentDirectional.center,
