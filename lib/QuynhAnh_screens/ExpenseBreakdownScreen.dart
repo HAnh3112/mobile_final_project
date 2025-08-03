@@ -1,19 +1,43 @@
+import 'package:final_project/QuynhAnh_screens/model/ExpenseOverview.dart';
+import 'package:final_project/QuynhAnh_screens/service/ExpenseOverview_service.dart';
+import 'package:final_project/model/User.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
+import 'package:intl/intl.dart';
 
-class ExpenseBreakdownScreen extends StatelessWidget {
-  const ExpenseBreakdownScreen({super.key});
+class ExpenseBreakdownScreen extends StatefulWidget {
+  final double income;
+  final double expense;
+  final DateTime currentDate;
+  const ExpenseBreakdownScreen({super.key, required this.income, required this.expense, required this.currentDate});
+  
+  @override
+  State<StatefulWidget> createState() => _ExpenseBreakdownScreenState();
+}
 
-  final List<Map<String, dynamic>> transactions = const [
-    {"category": "Food", "amount": 120.0, "color": Colors.blue},
-    {"category": "Transport", "amount": 80.0, "color": Colors.orange},
-    {"category": "Shopping", "amount": 150.0, "color": Colors.green},
-    {"category": "Other", "amount": 50.0, "color": Colors.purple},
-  ];
+class _ExpenseBreakdownScreenState extends State<ExpenseBreakdownScreen> {
+  int? userId;
+  final ExpenseOverview_service eos = ExpenseOverview_service();
 
-  double get totalAmount =>
-      transactions.fold(0.0, (sum, item) => sum + item["amount"]);
+  final DateFormat dateExpense = DateFormat("MM/yyyy");
+  List<ExpenseOverview> expenseCategory = [];
+
+  void showExpensebyCategory() async {
+    userId = await User.getStoredUserId();
+    List<ExpenseOverview> result = await eos.showExpensebyCategory(userId!, widget.currentDate.month, widget.currentDate.year);
+    setState(() {
+      expenseCategory = result;
+      print(expenseCategory);
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    showExpensebyCategory();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,9 +63,6 @@ class ExpenseBreakdownScreen extends StatelessWidget {
             _buildSummaryRow(),
             const SizedBox(height: 20),
             _buildPieChartSection(),
-            const SizedBox(height: 20),
-
-            _buildExportButtons(),
           ],
         ),
       ),
@@ -56,13 +77,13 @@ class ExpenseBreakdownScreen extends StatelessWidget {
           icon: Icons.arrow_upward,
           color: Colors.green,
           title: "This month",
-          amount: "+ \$3.500",
+          amount: "${widget.income.toString()} đ" ,
         ),
         _buildSummaryCard(
           icon: Icons.arrow_downward,
           color: Colors.red,
           title: "This month",
-          amount: "- \$2.700",
+          amount: '${widget.expense.toString()} đ',
         ),
       ],
     );
@@ -83,28 +104,45 @@ class ExpenseBreakdownScreen extends StatelessWidget {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Expense by category",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: currentTheme.main_button_text_color),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Expense by category",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: currentTheme.main_button_text_color),
+              ),
+              Text(dateExpense.format(widget.currentDate), 
+                style: TextStyle(color: currentTheme.main_button_text_color, fontSize: 18, fontWeight: FontWeight.bold))
+            ],
           ),
           const SizedBox(height: 16),
+          
+          (widget.expense == 0)
+          ? Column(
+            children: [
+              SizedBox(height: 20,),
+              Icon(Icons.auto_graph, color: Colors.white, size: 100,),
+              SizedBox(height: 20,),
+              Text("No expense this month", style: TextStyle(color: Colors.white, fontSize: 18),),
+            ],
+          )
+          :
           SizedBox(
             height: 200,
             child: PieChart(
               PieChartData(
-                sections: transactions.map((item) {
-                  final percent = (item["amount"] / totalAmount) * 100;
+                sections: expenseCategory.map((item) {
+                  final percent = (double.parse(item.amount) / widget.expense) * 100;
                   return PieChartSectionData(
-                    color: item["color"],
-                    value: item["amount"],
+                    color: item.color,
+                    value: double.parse(item.amount),
                     title: "${percent.toStringAsFixed(1)}%",
                     radius: 50,
                     titleStyle: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                   );
                 }).toList(),
@@ -115,7 +153,7 @@ class ExpenseBreakdownScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Column(
-            children: transactions.map((item) {
+            children: expenseCategory.map((item) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(
@@ -123,12 +161,12 @@ class ExpenseBreakdownScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.circle, size: 12, color: item["color"]),
+                        Icon(Icons.circle, size: 12, color: item.color),
                         const SizedBox(width: 8),
-                        Text(item["category"], style: TextStyle(color: currentTheme.main_text_color),),
+                        Text (item.name, style: TextStyle(color: currentTheme.main_text_color, fontWeight: FontWeight.bold, fontSize: 16),),
                       ],
                     ),
-                    Text("${item["amount"].toStringAsFixed(0)}\$", style: TextStyle(color: currentTheme.main_text_color)),
+                    Text("${item.amount} (${(100* double.parse(item.amount) / widget.expense).toStringAsFixed(1)}%)", style: TextStyle(color: currentTheme.main_text_color, fontSize: 16)),
                   ],
                 ),
               );
@@ -136,16 +174,6 @@ class ExpenseBreakdownScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildExportButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildExportButton(Icons.file_download, "Export CSV"),
-        _buildExportButton(Icons.file_download, "Export Excel"),
-      ],
     );
   }
 
@@ -187,19 +215,6 @@ class ExpenseBreakdownScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildExportButton(IconData icon, String text) {
-    return ElevatedButton.icon(
-      onPressed: () {},
-      icon: Icon(icon, size: 20, color: currentTheme.main_button_text_color,),
-      label: Text(text, style: TextStyle(color: currentTheme.main_button_text_color),),
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        backgroundColor: currentTheme.main_button_color,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }

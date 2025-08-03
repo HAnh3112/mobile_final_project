@@ -390,6 +390,7 @@
 
 import 'package:final_project/DataConverter.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
+import 'package:final_project/model/User.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:final_project/DoanAnhVu/transaction_history_screen.dart';
@@ -407,10 +408,11 @@ class AddTransactionScreen extends StatefulWidget {
 }
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
-  int userID = 1; // **QUAN TRỌNG: Thay thế 1 bằng ID người dùng thực tế**
+  int? userID;
   bool _isIncome = true;
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
+  
 
   // Thay đổi để lưu trữ CategorySimpleDTO thay vì chỉ String tên
   CategorySimpleDTO? _selectedCategory;
@@ -439,8 +441,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       _isLoadingCategories = true;
     });
     try {
-      final incomeCats = await _categoryService.getIncomeCategories(userID);
-      final expenseCats = await _categoryService.getExpenseCategories(userID);
+      userID = await User.getStoredUserId();
+      final incomeCats = await _categoryService.getIncomeCategories(userID!);
+      final expenseCats = await _categoryService.getExpenseCategories(userID!);
       setState(() {
         _incomeCategories = incomeCats;
         _expenseCategories = expenseCats;
@@ -459,7 +462,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       });
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Không thể tải danh mục: $e")));
+      ).showSnackBar(SnackBar(content: Text("Categories cannot be loaded: $e")));
     }
   }
 
@@ -495,7 +498,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       if (_selectedCategory == null) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text("Vui lòng chọn một danh mục.")));
+        ).showSnackBar(SnackBar(content: Text("Please select a category")));
         return;
       }
 
@@ -504,7 +507,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           ? _notesController.text
           : 'No note';
       final int userId =
-          userID;
+          userID!;
       final int categoryId =
           _selectedCategory!.categoryId; // Lấy categoryId từ đối tượng đã chọn
 
@@ -525,8 +528,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         context,
       ).showSnackBar(SnackBar(content: Text(results)));
       // Navigator.pushReplacement(context, MaterialPageRoute(builder: (builder) => TransactionHistoryScreen(showAppBar: true,)));
-      if (results.toLowerCase().contains("success") ||
-          results.toLowerCase().contains("thành công")) {
+      if (results.contains("Succeed")) {
         setState(() {
           _amountController.clear();
           _notesController.clear();

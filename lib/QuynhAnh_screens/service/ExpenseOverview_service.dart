@@ -23,10 +23,10 @@ class ExpenseOverview_service{
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
-      print("Success!");
+      print("Successfully retrieving top 3 expense!");
       return data.map((json) => ExpenseOverview.fromJson(json)).toList();
     } else {
-      print("Failed");
+      print("Failed to retrieve top 3 expense!");
       throw Exception('Failed to fetch top3 expense overview');
     }
   }
@@ -46,12 +46,35 @@ class ExpenseOverview_service{
 
     if (response.statusCode == 200) {
       final Map<String ,dynamic> data = jsonDecode(response.body);
-      print("Success!");
+      print("Successfully retrieving monthly summary!");
       return Summary.fromJson(data);
     } else {
-      print("Failed");
+      print("Failed to retrieve monthly summary!");
       throw Exception('Failed to fetch overview');
     }
+    
   }
+  Future<List<ExpenseOverview>> showExpensebyCategory(int id, int month, int year) async {
+    final url = Uri.http(currentHost, "/api/monthlyreport/monthlyExpense",
+      {
+        'userID': id.toString(),
+        'month': month.toString(),
+        'year': year.toString(),
+      },
+    );
+    
+    print("Data is being fetch...");
 
-}
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      print("Successfully retrieving full monthly expense!");
+      return data.map((json) => ExpenseOverview.fromJson(json)).toList();
+    } else {
+      print("Failed to retrieve full monthly expense!");
+      throw Exception('Failed to fetch expense by category');
+    }
+
+
+  }}

@@ -9,6 +9,7 @@ import 'package:final_project/QuynhAnh_screens/add_transaction_screen.dart';
 import 'package:final_project/QuynhAnh_screens/model/ExpenseOverview.dart';
 import 'package:final_project/QuynhAnh_screens/model/Summary.dart';
 import 'package:final_project/QuynhAnh_screens/service/ExpenseOverview_service.dart';
+import 'package:final_project/model/User.dart';
 import 'package:final_project/screens_Giap/auth_screen.dart';
 import 'package:final_project/screens_Giap/category_management_screen.dart';
 import 'package:flutter/material.dart';
@@ -24,8 +25,8 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int userId = 1;
-  String username = "alice";
+  int? userId;
+  String? username;
 
   
   int _selectedIndex = 0; // To keep track of the selected tab
@@ -38,6 +39,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
     BudgetPlanning(),
     CategoryManagementScreen(),
   ];
+
+  void _getUserInfo() async {
+    final id = await User.getStoredUserId();
+    final name = await User.getStoredUsername();
+    setState(() {
+      userId = id;
+      username = name;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _getUserInfo();
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -64,6 +81,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if(userId == null || username == null){
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       backgroundColor: currentTheme.background_color,
       appBar: AppBar(
@@ -217,10 +239,11 @@ class __DashboardContentState extends State<_DashboardContent> {
       lastDate: currentDate,
     );
     if (selected != null) {
+      final summary = await eos.showSummary(widget.userId!, selected.month, selected.year);
       final expense = await eos.showtop3ExOverview(widget.userId!, selected.month, selected.year);
-
       setState(() {
         pickedDate = selected;
+        sm = summary;
         leo = expense;
       });
     }
@@ -250,6 +273,7 @@ class __DashboardContentState extends State<_DashboardContent> {
     setState(() {
       leo = result;
     });
+
   }
 
   @override
@@ -374,7 +398,7 @@ class __DashboardContentState extends State<_DashboardContent> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const ExpenseBreakdownScreen(),
+                      builder: (context) => ExpenseBreakdownScreen(income: sm!.income, expense: sm!.expense, currentDate: pickedDate,),
                     ),
                   );
                 },
@@ -386,8 +410,9 @@ class __DashboardContentState extends State<_DashboardContent> {
             ],
           ),
           const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          (leo.isEmpty)?
+          Text("No Expense In This Month", style: TextStyle( color: currentTheme.sub_text_color, fontSize: 16),)
+          :Row(
             children: [
               // Placeholder for the chart/graph
               Container(
@@ -486,9 +511,14 @@ class __DashboardContentState extends State<_DashboardContent> {
             ],
           ),
           const SizedBox(height: 8),
-          ...ltht!.map((rt) => (
+          ...ltht.map((rt) => (
             _buildTransactionItem(rt.categoryName, datetran.format(rt.transactionDate), rt.amount.toString(), (rt.categoryType == "Income")? true:false)
-          )).toList()
+          )),
+          if(ltht.isEmpty) Container(
+            alignment: AlignmentDirectional.center,
+            child: Text("No Recent Transaction", style: TextStyle(color: currentTheme.sub_text_color, fontSize: 16))
+          
+          )
         ],
       ),
     );

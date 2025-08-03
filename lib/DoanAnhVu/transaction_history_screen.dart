@@ -4,6 +4,7 @@ import 'package:final_project/DoanAnhVu/services/transaction_filter_service.dart
 import 'package:final_project/DoanAnhVu/model/filter_data.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/current_theme.dart';
 import 'package:final_project/ThemeChanging_HaiAnh/theme.dart';
+import 'package:final_project/model/User.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project/QuynhAnh_screens/add_transaction_screen.dart';
 import 'package:final_project/DoanAnhVu/DTO/TransactionHistoryDTO.dart'; // Import model mới
@@ -36,7 +37,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
 
   // Re-enable FilterData usage
   FilterData _currentFilter = FilterData();
-  int _currentUserId = 1; // Thay thế bằng ID người dùng thực tế
+  int? _currentUserId; // Thay thế bằng ID người dùng thực tế
 
   @override
   void initState() {
@@ -60,8 +61,9 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       _errorMessage = '';
     });
     try {
+      _currentUserId = await User.getStoredUserId();
       final fetchedTransactions = await _transactionService
-          .getUserTransactionHistory(_currentUserId);
+          .getUserTransactionHistory(_currentUserId!);
       setState((
       ) {
         _allTransactions = fetchedTransactions;
@@ -609,10 +611,10 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                               // Unique key for each transaction based on transaction ID
                               key: Key('transaction_${transaction.transactionID}'),
                               // Only allow left-to-right swipe for deletion
-                              direction: DismissDirection.startToEnd,
+                              direction: DismissDirection.endToStart,
                               // Custom dismiss thresholds - require 40% swipe to trigger
                               dismissThresholds: const {
-                                DismissDirection.startToEnd: 0.4,
+                                DismissDirection.endToStart: 0.4,
                               },
                               // Background widget shown while swiping (red background with delete icon)
                               background: Container(
@@ -622,8 +624,9 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                                   color: Colors.red, // Red background for delete action
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                alignment: Alignment.centerLeft,
+                                alignment: Alignment.centerRight,
                                 child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     Icon(
                                       Icons.delete, // White garbage/delete icon

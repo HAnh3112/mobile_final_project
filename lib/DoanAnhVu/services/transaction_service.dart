@@ -44,7 +44,7 @@ class TransactionService {
         print('Transaction created successfully: ${response.body}');
         // Tùy chọn: Nếu backend trả về đối tượng Transaction đã tạo, bạn có thể phân tích cú pháp ở đây
         // return Transaction.fromJson(jsonDecode(response.body));
-        return 'Suceed to add transaction'; // Trả về null hoặc đối tượng Transaction đã tạo nếu bạn parse nó
+        return 'Succeed to add transaction'; // Trả về null hoặc đối tượng Transaction đã tạo nếu bạn parse nó
       } else {
         print('Failed to create transaction. Status code: ${response.statusCode}');
         print('Response body: ${response.body}');

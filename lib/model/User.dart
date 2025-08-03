@@ -23,4 +23,9 @@ class User {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt('userID');
   }
+
+  static Future<String?> getStoredUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('username');
+  }
 }
